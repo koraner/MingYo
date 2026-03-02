@@ -41,9 +41,11 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
     );
     const Brain = (p) => <IconWrapper {...p}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></IconWrapper>;
-    const FileText = (p) => <IconWrapper {...p}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></IconWrapper>;
     const Activity = (p) => <IconWrapper {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></IconWrapper>;
+    const FileText = (p) => <IconWrapper {...p}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></IconWrapper>;
     const TableIcon = (p) => <IconWrapper {...p}><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></IconWrapper>;
+    const Users = (p) => <IconWrapper {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconWrapper>;
+    const Target = (p) => <IconWrapper {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></IconWrapper>;
     const ExternalLink = (p) => <IconWrapper {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></IconWrapper>;
     const Briefcase = (p) => <IconWrapper {...p}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></IconWrapper>;
     const ArrowRight = (p) => <IconWrapper {...p}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></IconWrapper>;
@@ -62,7 +64,7 @@
         description: '將生硬的保險建議書 PDF 自動解析，轉化為直覺的互動式走勢圖，讓客戶一眼看懂保單回本期與價值增長趨勢。',
         icon: <Activity className="w-6 h-6" />,
         type: 'external',
-        url: 'https://timely-kulfi-699a04.netlify.app/',
+        url: 'https://koraner.github.io/Policy-Vision-Logic/',
         details: (
           <div className="space-y-8">
             <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
@@ -103,24 +105,124 @@
         )
       },
       {
-        id: 'pdf-tool',
+        id: 'personality-pro',
+        title: '保險業務潛能評測系統 (面試官版)',
+        description: '專為保險招募設計的高階測評系統。獨家內建「作答真實性演算法」防範測驗作假，並以 AI 生成專屬面談攻略與施壓話術。',
+        icon: <Brain className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://koraner.github.io/Personality-Portal-Insight-Pro/',
+        details: (
+          <div className="space-y-8">
+            <section>
+              <div className="bg-indigo-50 p-4 rounded-lg mb-6 border border-indigo-100">
+                <p className="text-indigo-900 font-medium italic text-center">「讓招募回歸『人』的本質，用數據看見『心』的驅動力。」</p>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💡 面試官專業版初衷</h3>
+              <p className="text-slate-700 leading-relaxed">
+                在保險業的高壓招募中，面試官常面臨候選人「過度包裝」的挑戰。此專業版本不僅整合了 7 大測評模組，更引入了<strong>系統作答真實性評估</strong>，透過作答時間與數據矛盾點自動偵測社會期許誤差，確保您拿到的是最真實的人才數據。
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔥 專業版獨家功能</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                  <h4 className="font-bold text-rose-800 mb-2 flex items-center gap-2">🔍 作答防偽偵測</h4>
+                  <p className="text-sm text-rose-700">內建演算法檢測作答速度、直線作答(Straight-lining)與特質矛盾點，自動產出「信任指數」與可疑點警告。</p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                  <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">🤖 面談攻略 AI 腳本</h4>
+                  <p className="text-sm text-blue-700">自動生成針對性的「施壓提問」、「MDRT 潛質分析」以及發掘助理轉業務的「無痛轉型劇本」。</p>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🛠️ 操作流程 (SOP)</h3>
+              <ol className="list-decimal pl-5 space-y-4 text-slate-700 text-sm">
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 1：開啟面試官權限 (God Mode)</span>
+                  進入網站後，連續點擊左上角的 Logo <strong>5 次</strong>，即可解鎖隱藏的管理後台。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 2：設定與發送</span>
+                  點擊「建立新測驗」，生成一組 <strong>Config Code</strong> 傳送給求職者。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 3：解析與驗證</span>
+                  求職者完成測驗回傳 Result Code。您在首頁貼上代碼後，優先查看<strong>「系統作答真實性評估」</strong>，再點擊底部按鈕一鍵生成 AI 分析報告。
+                </li>
+              </ol>
+            </section>
+            
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🧩 整合 7 大模組</h3>
+              <div className="flex flex-wrap gap-2 text-sm text-slate-600">
+                <span className="p-2 bg-slate-100 rounded">DISC 行為風格</span>
+                <span className="p-2 bg-slate-100 rounded">工作價值觀 Values</span>
+                <span className="p-2 bg-slate-100 rounded">核心驅動力 Outcomes</span>
+                <span className="p-2 bg-slate-100 rounded">成功特質 Traits</span>
+                <span className="p-2 bg-slate-100 rounded">九型人格 Enneagram</span>
+                <span className="p-2 bg-slate-100 rounded">大五人格 Big 5</span>
+                <span className="p-2 bg-slate-100 rounded">Holland 職業興趣</span>
+              </div>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'personality-campus',
+        title: '人才潛能評測系統 (校園徵才版)',
+        description: '面向校園與年輕族群的輕量化職涯探索工具。透過測評協助新鮮人深層自我覺察，並以 AI 輔助生成專屬的職涯定位指南。',
+        icon: <Users className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://koraner.github.io/Personality-Portal-Future-Spark/',
+        details: (
+          <div className="space-y-8">
+            <section>
+              <div className="bg-emerald-50 p-4 rounded-lg mb-6 border border-emerald-100">
+                <p className="text-emerald-900 font-medium italic text-center">「給年輕世代的自我說明書，探索隱藏的職場天賦。」</p>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🌱 校園徵才版初衷</h3>
+              <p className="text-slate-700 leading-relaxed">
+                專為校園徵才、實習生招募與社會新鮮人設計的版本。移除了尖銳的面試防偽判定，將重點放在<strong>「職涯探索」</strong>與<strong>「天賦發掘」</strong>，讓測評過程變成一次充滿溫度的免費生涯諮詢，有效提升雇主品牌形象。
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🎯 新鮮人專屬亮點</h3>
+              <ul className="list-disc pl-5 space-y-3 text-slate-700 text-sm">
+                <li><strong>深層自我察覺：</strong> 幫助社會經驗較少的年輕人，釐清自己的核心驅動力 (Outcomes) 與工作價值觀。</li>
+                <li><strong>Holland 適配指南：</strong> 視覺化呈現職涯興趣，解答「我到底適合衝鋒陷陣，還是運籌帷幄？」。</li>
+                <li><strong>AI 成長備忘錄：</strong> 生成專屬的職涯方向建議，並給予克服性格盲點的「原子習慣」方案。</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💻 隱私與技術架構</h3>
+              <ul className="space-y-3 text-slate-700 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">隱私</span>
+                  <div><strong>純離線架構 (Pure Offline)：</strong>無後端資料庫，新鮮人個資零風險。</div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">便攜</span>
+                  <div><strong>Code-Based 傳輸：</strong>行動裝置友善，用代碼即插即用，無須下載 App。</div>
+                </li>
+              </ul>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'pdf-tool-legacy',
         title: '保誠（非年金）標注工具',
-        description: '針對保險業務設計的 PDF 分析與標註工具。具備自動拆分文字、數據透視校正功能，並能一鍵生成帶有行銷註解的 PDF 或 PPTX 簡報。',
+        description: '針對保險業務設計的傳統 PDF 分析與標註工具。具備自動拆分文字與數據透視校正功能。',
         icon: <FileText className="w-6 h-6" />,
         type: 'external',
         url: 'https://gemini.google.com/share/21ff118ad287',
         details: (
           <div className="space-y-8">
-            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
-              <h4 className="text-amber-800 font-bold text-lg mb-2 flex items-center gap-2">⚠️ 核心限制與事前準備 (重要)</h4>
-              <p className="text-amber-700 text-sm mb-2">在使用系統之前，請確認您的建議書檔案符合以下三個關鍵條件，否則可能導致讀取失敗或數據錯誤：</p>
-              <ul className="list-disc pl-5 text-amber-700 text-sm space-y-1">
-                <li><strong>必須為 PDF 格式：</strong>系統僅支援 PDF 電子檔，不支援翻拍照片或掃描圖片。</li>
-                <li><strong>必須包含特定表格：</strong>您的建議書中，必須包含 「減少保險金額影響表」。系統是依據此表格的數據結構進行抓取與分析。</li>
-                <li><strong>僅需中分紅頁面：</strong>在輸出建議書 PDF 時，請只勾選/保留「中分紅」的頁面。不需要高分紅或低分紅的數據。</li>
-              </ul>
-            </div>
-
             <section>
               <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🚀 操作流程</h3>
               <ol className="list-decimal pl-5 space-y-4 text-slate-700">
@@ -133,127 +235,10 @@
                   將 PDF 檔案拖曳至畫面的上傳區域，或點擊按鈕選取檔案。
                 </li>
                 <li className="pl-2">
-                  <span className="font-bold block text-slate-900">一鍵生成</span>
-                  檔案上傳完成後，系統會自動進行解析。您無需進行複雜設定，圖表將會自動生成。
-                </li>
-                <li className="pl-2">
                   <span className="font-bold block text-slate-900">自由排版 (拖拉功能)</span>
-                  生成後的畫面中，所有的文字標籤、數值區塊都是可以互動的。如果文字擋住了線條，直接用滑鼠點擊並拖曳即可。
-                </li>
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900">完成與輸出</span>
-                  確認版面無誤後，即可使用上方工具列的按鈕將結果匯出為新的 PDF 或 PPT 簡報檔。
+                  生成後的畫面中，所有的文字標籤、數值區塊都是可以互動的。
                 </li>
               </ol>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">❓ 常見問題 (Q&A)</h3>
-              <div className="space-y-4">
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <p className="font-bold text-slate-900 mb-1">Q: 為什麼生成的數據看起來怪怪的？</p>
-                  <p className="text-slate-600 text-sm">A: 請檢查您的原始 PDF 是否包含了「高分紅」或「低分紅」的頁面，這可能會導致程式抓到錯誤的欄位。請重新輸出建議書，僅保留「中分紅」頁面後重新上傳。</p>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-lg">
-                  <p className="font-bold text-slate-900 mb-1">Q: 可以上傳圖片嗎？</p>
-                  <p className="text-slate-600 text-sm">A: 不行。為了確保數據精確度，本版本僅支援原始 PDF 檔案解析。</p>
-                </div>
-              </div>
-            </section>
-          </div>
-        )
-      },
-      {
-        id: 'personality-portal',
-        title: '人才潛能評測系統',
-        description: '全方位的個人特質分析平台。整合 DISC、九型人格、大五人格與 Holland 職涯興趣測驗，提供視覺化雷達圖與詳細的 AI 輔助分析報告。',
-        icon: <Brain className="w-6 h-6" />,
-        type: 'external',
-        url: 'https://professional-personality-assessment.netlify.app/',
-        details: (
-          <div className="space-y-8">
-            <section>
-              <div className="bg-indigo-50 p-4 rounded-lg mb-6 border border-indigo-100">
-                <p className="text-indigo-900 font-medium italic text-center">「讓招募回歸『人』的本質，用數據看見『心』的驅動力。」</p>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💡 專案初衷</h3>
-              <p className="text-slate-700 leading-relaxed">
-                在保險業的增員過程中，我們常面臨「看走眼」的遺憾。本專案旨在消除面試官的主觀偏見，透過科學化的多維度測評，協助團隊找到「對的人」。建立一套無需聯網、高度隱私、隨開即用的系統，讓每一場增員面談，都能從「憑感覺」轉變為「憑數據」。
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🛠️ 操作流程 (SOP)</h3>
-              <ol className="list-decimal pl-5 space-y-4 text-slate-700 text-sm">
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 1：開啟面試官權限 (God Mode)</span>
-                  進入網站後，連續點擊左上角的 <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-600 font-bold"><Shield className="w-3 h-3 mr-1 inline"/> Personality Portal</span> Logo <strong>5 次</strong>，即可解鎖隱藏的管理後台。
-                </li>
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 2：設定與發送</span>
-                  點擊「建立新測驗」，勾選需要的模組（如 DISC, Values...），系統會生成一組 <strong>Config Code</strong>。
-                  <div className="mt-2 p-3 bg-blue-50 text-blue-800 rounded border border-blue-100">
-                    <strong>發送方式：</strong>請將「本網站連結」連同「Config Code」傳送給候選人。
-                  </div>
-                </li>
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 3：候選人作答</span>
-                  候選人打開網站 -> 輸入 Config Code -> 開始測驗。測驗結束後，系統會生成一組 <strong>Result Code</strong>。
-                </li>
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 4：解析報告</span>
-                  請候選人回傳 Result Code。您回到網站首頁，貼上該代碼，即可看見完整的視覺化分析報表與 AI 建議。
-                </li>
-              </ol>
-            </section>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <section>
-                <h3 className="text-lg font-bold text-slate-900 mb-3 text-blue-700">對組織 (HR/主管)</h3>
-                <ul className="list-disc pl-5 space-y-2 text-slate-700 text-sm">
-                  <li><strong>精準識人：</strong>透過 7 大模組交叉分析，預測銷售潛力與定著率。</li>
-                  <li><strong>提升面談品質：</strong>利用 AI 生成針對性的「施壓話術」與「破冰策略」。</li>
-                  <li><strong>轉型引導：</strong>發掘「時薪助理」潛藏的業務特質，擴大增員來源。</li>
-                </ul>
-              </section>
-              <section>
-                <h3 className="text-lg font-bold text-slate-900 mb-3 text-green-700">對候選人</h3>
-                <ul className="list-disc pl-5 space-y-2 text-slate-700 text-sm">
-                  <li><strong>深度自我覺察：</strong>不只是應徵，更是一次免費的生涯諮詢。</li>
-                  <li><strong>職涯定位：</strong>確認保險業是否符合其人生價值觀 (Holland/Outcomes)。</li>
-                </ul>
-              </section>
-            </div>
-
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🧩 核心 7 大模組</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                <div className="p-2 bg-slate-100 rounded text-center">DISC 行為風格</div>
-                <div className="p-2 bg-slate-100 rounded text-center">工作價值觀 Values</div>
-                <div className="p-2 bg-slate-100 rounded text-center">核心驅動力 Outcomes</div>
-                <div className="p-2 bg-slate-100 rounded text-center">成功特質 Traits</div>
-                <div className="p-2 bg-slate-100 rounded text-center">九型人格 Enneagram</div>
-                <div className="p-2 bg-slate-100 rounded text-center">大五人格 Big 5</div>
-                <div className="p-2 bg-slate-100 rounded text-center">Holland 職業興趣</div>
-              </div>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💎 獨特價值與技術</h3>
-              <ul className="space-y-3 text-slate-700">
-                <li className="flex items-start gap-2">
-                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">隱私</span>
-                  <div><strong>純離線架構 (Pure Offline)：</strong>無後端資料庫，資料透過加密代碼 (Base64) 點對點傳輸，資安零風險。</div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">權限</span>
-                  <div><strong>God Mode (上帝模式)：</strong>隱藏式後台設計 (點擊 Logo 5 次)，區隔權限，確保專業度。</div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">AI</span>
-                  <div><strong>AI 賦能：</strong>內建針對保險業訓練的 Prompt 指令，讓 ChatGPT 成為您的隨身心理學家。</div>
-                </li>
-              </ul>
             </section>
           </div>
         )
@@ -301,15 +286,6 @@
                 <li><strong>複製數據：</strong>辨識結果顯示於右側，點擊「複製表格」即可貼往您的工作軟體。</li>
               </ol>
             </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🎯 應用場景</h3>
-              <ul className="list-disc pl-5 space-y-2 text-slate-700">
-                <li><strong>財務對照：</strong>從銀行帳單截圖、發票掃描檔中提取金額。</li>
-                <li><strong>資料登錄：</strong>處理無法選取文字的 PDF 截圖或網頁圖片。</li>
-                <li><strong>複雜表格：</strong>快速抓取複雜表格中的序號、編號或統計數據。</li>
-              </ul>
-            </section>
           </div>
         )
       }
@@ -334,7 +310,7 @@
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-scale-in">
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-3">
                 <span className="p-2 bg-white rounded-lg shadow-sm text-blue-600 border border-slate-100">
                   {project.icon}
                 </span>
@@ -342,14 +318,14 @@
               </h2>
               <button 
                 onClick={onClose} 
-                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
+                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500 shrink-0"
               >
                 <XIcon size={24} />
               </button>
             </div>
 
             {/* Modal Body (Scrollable) */}
-            <div className="p-8 overflow-y-auto custom-scroller flex-1">
+            <div className="p-6 sm:p-8 overflow-y-auto custom-scroller flex-1">
               {project.details}
             </div>
 
@@ -396,7 +372,7 @@
           {/* 頂部導覽列 */}
           <header className="bg-white border-b border-slate-200 sticky top-0 z-40 bg-white/80 backdrop-blur-md">
             <div className="max-w-5xl mx-auto px-6 h-16 flex justify-between items-center">
-              <div className="flex items-center gap-2 text-xl font-bold text-slate-900 cursor-pointer hover:text-blue-600 transition">
+              <div className="flex items-center gap-2 text-xl font-bold text-slate-900 cursor-pointer hover:text-blue-600 transition" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
                 <Briefcase className="w-6 h-6 text-blue-600" />
                 <span>My Portfolio Hub</span>
               </div>
@@ -436,7 +412,7 @@
                         </div>
                       </div>
                       
-                      <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
                         {project.title}
                       </h3>
                       <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-1 text-justify line-clamp-3">
