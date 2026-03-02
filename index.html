@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio Hub</title>
+  
+  <!-- 引入 Tailwind CSS (樣式) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 引入 React 和 React DOM (核心框架) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- 引入 Babel (讓瀏覽器看懂 JSX) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* 自定義捲軸樣式 */
+    .custom-scroller::-webkit-scrollbar { width: 8px; }
+    .custom-scroller::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroller::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroller::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <div id="root"></div>
+
+  <!-- 您的 React 程式碼 -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- ICON COMPONENTS ---
+    const IconWrapper = ({ children, className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
+    );
+    const Brain = (p) => <IconWrapper {...p}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></IconWrapper>;
+    const FileText = (p) => <IconWrapper {...p}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></IconWrapper>;
+    const Activity = (p) => <IconWrapper {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></IconWrapper>;
+    const TableIcon = (p) => <IconWrapper {...p}><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></IconWrapper>;
+    const ExternalLink = (p) => <IconWrapper {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></IconWrapper>;
+    const Briefcase = (p) => <IconWrapper {...p}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></IconWrapper>;
+    const ArrowRight = (p) => <IconWrapper {...p}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></IconWrapper>;
+    const Star = (p) => <IconWrapper {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconWrapper>;
+    const XIcon = (p) => <IconWrapper {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconWrapper>;
+    const InfoIcon = (p) => <IconWrapper {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconWrapper>;
+    const Shield = (p) => <IconWrapper {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></IconWrapper>;
+
+    // ==============================================
+    // 1. 專案資料設定區 (含詳細內容 HTML)
+    // ==============================================
+    const projectsData = [
+      {
+        id: 'policy-viz',
+        title: '建議書視覺化程式',
+        description: '將生硬的保險建議書 PDF 自動解析，轉化為直覺的互動式走勢圖，讓客戶一眼看懂保單回本期與價值增長趨勢。',
+        icon: <Activity className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://timely-kulfi-699a04.netlify.app/',
+        details: (
+          <div className="space-y-8">
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+              <h4 className="text-amber-800 font-bold text-lg mb-2 flex items-center gap-2">⚠️ 核心限制與事前準備</h4>
+              <p className="text-amber-700 text-sm mb-2">在使用系統之前，請確認您的建議書檔案符合以下三個關鍵條件，否則可能導致讀取失敗或數據錯誤：</p>
+              <ul className="list-disc pl-5 text-amber-700 text-sm space-y-1">
+                <li><strong>必須為 PDF 格式：</strong>系統僅支援 PDF 電子檔，不支援翻拍照片或掃描圖片。</li>
+                <li><strong>必須包含特定表格：</strong>您的建議書中，必須包含 「減少保險金額影響表」。</li>
+                <li><strong>僅需中分紅頁面：</strong>在輸出建議書 PDF 時，請只保留「中分紅」的頁面。</li>
+              </ul>
+            </div>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔍 產品概述</h3>
+              <p className="text-slate-700 leading-relaxed text-sm">
+                專為保險從業人員設計的視覺化輔助工具。解決了客戶在面對密密麻麻數字表格時的理解障礙，透過 PDF.js 自動擷取「年齡」、「累積保費」、「保險額度」與「解約金」等關鍵欄位，並即時繪製成動態折線圖，清楚呈現損益平衡點。
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">✨ 核心亮點</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">一鍵精準解析</h4>
+                  <p className="text-sm text-slate-600">上傳 PDF 即可自動對齊表格、過濾雜訊並提取數值。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">直覺走勢圖表</h4>
+                  <p className="text-sm text-slate-600">利用 Recharts 繪製，支援數據 Tooltip 預覽，最高呈現至 109 歲。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">損益黃金交叉</h4>
+                  <p className="text-sm text-slate-600">綠線(成本)與紅線(價值)對比，秒懂保單何時開始回本與增值。</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'pdf-tool',
+        title: '保誠（非年金）標注工具',
+        description: '針對保險業務設計的 PDF 分析與標註工具。具備自動拆分文字、數據透視校正功能，並能一鍵生成帶有行銷註解的 PDF 或 PPTX 簡報。',
+        icon: <FileText className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://gemini.google.com/share/21ff118ad287',
+        details: (
+          <div className="space-y-8">
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+              <h4 className="text-amber-800 font-bold text-lg mb-2 flex items-center gap-2">⚠️ 核心限制與事前準備 (重要)</h4>
+              <p className="text-amber-700 text-sm mb-2">在使用系統之前，請確認您的建議書檔案符合以下三個關鍵條件，否則可能導致讀取失敗或數據錯誤：</p>
+              <ul className="list-disc pl-5 text-amber-700 text-sm space-y-1">
+                <li><strong>必須為 PDF 格式：</strong>系統僅支援 PDF 電子檔，不支援翻拍照片或掃描圖片。</li>
+                <li><strong>必須包含特定表格：</strong>您的建議書中，必須包含 「減少保險金額影響表」。系統是依據此表格的數據結構進行抓取與分析。</li>
+                <li><strong>僅需中分紅頁面：</strong>在輸出建議書 PDF 時，請只勾選/保留「中分紅」的頁面。不需要高分紅或低分紅的數據。</li>
+              </ul>
+            </div>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🚀 操作流程</h3>
+              <ol className="list-decimal pl-5 space-y-4 text-slate-700">
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">準備檔案</span>
+                  確認您的 PDF 建議書已備妥，且僅包含中分紅頁面。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">上傳檔案</span>
+                  將 PDF 檔案拖曳至畫面的上傳區域，或點擊按鈕選取檔案。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">一鍵生成</span>
+                  檔案上傳完成後，系統會自動進行解析。您無需進行複雜設定，圖表將會自動生成。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">自由排版 (拖拉功能)</span>
+                  生成後的畫面中，所有的文字標籤、數值區塊都是可以互動的。如果文字擋住了線條，直接用滑鼠點擊並拖曳即可。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">完成與輸出</span>
+                  確認版面無誤後，即可使用上方工具列的按鈕將結果匯出為新的 PDF 或 PPT 簡報檔。
+                </li>
+              </ol>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">❓ 常見問題 (Q&A)</h3>
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-4 rounded-lg">
+                  <p className="font-bold text-slate-900 mb-1">Q: 為什麼生成的數據看起來怪怪的？</p>
+                  <p className="text-slate-600 text-sm">A: 請檢查您的原始 PDF 是否包含了「高分紅」或「低分紅」的頁面，這可能會導致程式抓到錯誤的欄位。請重新輸出建議書，僅保留「中分紅」頁面後重新上傳。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg">
+                  <p className="font-bold text-slate-900 mb-1">Q: 可以上傳圖片嗎？</p>
+                  <p className="text-slate-600 text-sm">A: 不行。為了確保數據精確度，本版本僅支援原始 PDF 檔案解析。</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'personality-portal',
+        title: '人才潛能評測系統',
+        description: '全方位的個人特質分析平台。整合 DISC、九型人格、大五人格與 Holland 職涯興趣測驗，提供視覺化雷達圖與詳細的 AI 輔助分析報告。',
+        icon: <Brain className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://professional-personality-assessment.netlify.app/',
+        details: (
+          <div className="space-y-8">
+            <section>
+              <div className="bg-indigo-50 p-4 rounded-lg mb-6 border border-indigo-100">
+                <p className="text-indigo-900 font-medium italic text-center">「讓招募回歸『人』的本質，用數據看見『心』的驅動力。」</p>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💡 專案初衷</h3>
+              <p className="text-slate-700 leading-relaxed">
+                在保險業的增員過程中，我們常面臨「看走眼」的遺憾。本專案旨在消除面試官的主觀偏見，透過科學化的多維度測評，協助團隊找到「對的人」。建立一套無需聯網、高度隱私、隨開即用的系統，讓每一場增員面談，都能從「憑感覺」轉變為「憑數據」。
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🛠️ 操作流程 (SOP)</h3>
+              <ol className="list-decimal pl-5 space-y-4 text-slate-700 text-sm">
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 1：開啟面試官權限 (God Mode)</span>
+                  進入網站後，連續點擊左上角的 <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-600 font-bold"><Shield className="w-3 h-3 mr-1 inline"/> Personality Portal</span> Logo <strong>5 次</strong>，即可解鎖隱藏的管理後台。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 2：設定與發送</span>
+                  點擊「建立新測驗」，勾選需要的模組（如 DISC, Values...），系統會生成一組 <strong>Config Code</strong>。
+                  <div className="mt-2 p-3 bg-blue-50 text-blue-800 rounded border border-blue-100">
+                    <strong>發送方式：</strong>請將「本網站連結」連同「Config Code」傳送給候選人。
+                  </div>
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 3：候選人作答</span>
+                  候選人打開網站 -> 輸入 Config Code -> 開始測驗。測驗結束後，系統會生成一組 <strong>Result Code</strong>。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 4：解析報告</span>
+                  請候選人回傳 Result Code。您回到網站首頁，貼上該代碼，即可看見完整的視覺化分析報表與 AI 建議。
+                </li>
+              </ol>
+            </section>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <section>
+                <h3 className="text-lg font-bold text-slate-900 mb-3 text-blue-700">對組織 (HR/主管)</h3>
+                <ul className="list-disc pl-5 space-y-2 text-slate-700 text-sm">
+                  <li><strong>精準識人：</strong>透過 7 大模組交叉分析，預測銷售潛力與定著率。</li>
+                  <li><strong>提升面談品質：</strong>利用 AI 生成針對性的「施壓話術」與「破冰策略」。</li>
+                  <li><strong>轉型引導：</strong>發掘「時薪助理」潛藏的業務特質，擴大增員來源。</li>
+                </ul>
+              </section>
+              <section>
+                <h3 className="text-lg font-bold text-slate-900 mb-3 text-green-700">對候選人</h3>
+                <ul className="list-disc pl-5 space-y-2 text-slate-700 text-sm">
+                  <li><strong>深度自我覺察：</strong>不只是應徵，更是一次免費的生涯諮詢。</li>
+                  <li><strong>職涯定位：</strong>確認保險業是否符合其人生價值觀 (Holland/Outcomes)。</li>
+                </ul>
+              </section>
+            </div>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🧩 核心 7 大模組</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                <div className="p-2 bg-slate-100 rounded text-center">DISC 行為風格</div>
+                <div className="p-2 bg-slate-100 rounded text-center">工作價值觀 Values</div>
+                <div className="p-2 bg-slate-100 rounded text-center">核心驅動力 Outcomes</div>
+                <div className="p-2 bg-slate-100 rounded text-center">成功特質 Traits</div>
+                <div className="p-2 bg-slate-100 rounded text-center">九型人格 Enneagram</div>
+                <div className="p-2 bg-slate-100 rounded text-center">大五人格 Big 5</div>
+                <div className="p-2 bg-slate-100 rounded text-center">Holland 職業興趣</div>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💎 獨特價值與技術</h3>
+              <ul className="space-y-3 text-slate-700">
+                <li className="flex items-start gap-2">
+                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">隱私</span>
+                  <div><strong>純離線架構 (Pure Offline)：</strong>無後端資料庫，資料透過加密代碼 (Base64) 點對點傳輸，資安零風險。</div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">權限</span>
+                  <div><strong>God Mode (上帝模式)：</strong>隱藏式後台設計 (點擊 Logo 5 次)，區隔權限，確保專業度。</div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">AI</span>
+                  <div><strong>AI 賦能：</strong>內建針對保險業訓練的 Prompt 指令，讓 ChatGPT 成為您的隨身心理學家。</div>
+                </li>
+              </ul>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'ocr-tool',
+        title: '極速數字提取 (OCR)',
+        description: '高效的圖片轉表格工具。支援截圖貼上與自動裁切，利用 Gemini 視覺模型快速辨識圖中數值並轉為可複製的表格格式。',
+        icon: <TableIcon className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://gemini.google.com/share/b71869448855',
+        details: (
+          <div className="space-y-8">
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔍 產品概述</h3>
+              <p className="text-slate-700 leading-relaxed">
+                這是一款專為數據輸入與財務對照設計的智慧工具。結合網頁技術與 Gemini AI 視覺引擎，讓使用者能從圖片、截圖中精準提取數字，並自動轉化為可編輯的表格格式。
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">✨ 核心亮點</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">跨平台優化</h4>
+                  <p className="text-sm text-slate-600">自動偵測 Windows/Mac，支援 Cmd+V 或 Ctrl+V 貼上截圖。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">智慧區域選取</h4>
+                  <p className="text-sm text-slate-600">支援滑鼠拖曳裁切，只辨識需要的欄位，大幅提升準確度。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">Excel 高度相容</h4>
+                  <p className="text-sm text-slate-600">一鍵複製 TSV 格式，可直接貼上至 Excel、Google Sheets。</p>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🛠️ 操作指南</h3>
+              <ol className="list-decimal pl-5 space-y-3 text-slate-700">
+                <li><strong>輸入圖片：</strong>使用快捷鍵直接貼上截圖，或點擊上傳按鈕。</li>
+                <li><strong>選取區域：</strong>圖片出現後，使用滑鼠拖曳框選出您想要辨識的數字範圍 (排除雜訊)。</li>
+                <li><strong>確認辨識：</strong>點擊「立即辨識」，AI 將自動解析。</li>
+                <li><strong>複製數據：</strong>辨識結果顯示於右側，點擊「複製表格」即可貼往您的工作軟體。</li>
+              </ol>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🎯 應用場景</h3>
+              <ul className="list-disc pl-5 space-y-2 text-slate-700">
+                <li><strong>財務對照：</strong>從銀行帳單截圖、發票掃描檔中提取金額。</li>
+                <li><strong>資料登錄：</strong>處理無法選取文字的 PDF 截圖或網頁圖片。</li>
+                <li><strong>複雜表格：</strong>快速抓取複雜表格中的序號、編號或統計數據。</li>
+              </ul>
+            </section>
+          </div>
+        )
+      }
+    ];
+
+    // ==============================================
+    // 2. 詳細資訊彈窗組件 (Modal)
+    // ==============================================
+    const ProjectModal = ({ project, onClose }) => {
+      if (!project) return null;
+
+      // 點擊背景關閉
+      const handleBackdropClick = (e) => {
+        if (e.target === e.currentTarget) onClose();
+      };
+
+      return (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+          onClick={handleBackdropClick}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-scale-in">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                <span className="p-2 bg-white rounded-lg shadow-sm text-blue-600 border border-slate-100">
+                  {project.icon}
+                </span>
+                {project.title}
+              </h2>
+              <button 
+                onClick={onClose} 
+                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
+              >
+                <XIcon size={24} />
+              </button>
+            </div>
+
+            {/* Modal Body (Scrollable) */}
+            <div className="p-8 overflow-y-auto custom-scroller flex-1">
+              {project.details}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 shrink-0">
+              <button 
+                onClick={onClose}
+                className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              >
+                關閉
+              </button>
+              <a 
+                href={project.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold transition-colors flex items-center gap-2 shadow-lg shadow-blue-200"
+              >
+                前往使用 <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ==============================================
+    // 3. 主網站組件
+    // ==============================================
+    function PortfolioHub() {
+      const [selectedProject, setSelectedProject] = useState(null);
+
+      // 防止 Modal 開啟時背景捲動
+      useEffect(() => {
+        if (selectedProject) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+      }, [selectedProject]);
+
+      return (
+        <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+          {/* 頂部導覽列 */}
+          <header className="bg-white border-b border-slate-200 sticky top-0 z-40 bg-white/80 backdrop-blur-md">
+            <div className="max-w-5xl mx-auto px-6 h-16 flex justify-between items-center">
+              <div className="flex items-center gap-2 text-xl font-bold text-slate-900 cursor-pointer hover:text-blue-600 transition">
+                <Briefcase className="w-6 h-6 text-blue-600" />
+                <span>My Portfolio Hub</span>
+              </div>
+              <div className="text-sm font-medium text-slate-500">
+                我的數位收藏
+              </div>
+            </div>
+          </header>
+
+          {/* 主要內容區 */}
+          <main className="max-w-5xl mx-auto px-6 py-12 min-h-[80vh]">
+            <div className="space-y-12 animate-fade-in">
+              {/* 簡介區塊 */}
+              <section className="text-center space-y-4 max-w-2xl mx-auto mt-8">
+                <div className="inline-flex items-center justify-center p-3 bg-blue-50 text-blue-600 rounded-full mb-2 ring-1 ring-blue-100">
+                  <Star className="w-6 h-6 fill-blue-600" />
+                </div>
+                <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                  精選專案連結
+                </h1>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  這裡彙整了我與 AI 協作開發的各項成果。點擊卡片可查看詳細說明或直接前往使用。
+                </p>
+              </section>
+
+              {/* 專案列表網格 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projectsData.map((project) => (
+                  <div 
+                    key={project.id}
+                    className="group flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-14 h-14 bg-slate-50 text-slate-700 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 shadow-inner">
+                          {project.icon}
+                        </div>
+                      </div>
+                      
+                      <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                        {project.title}
+                      </h3>
+                      <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-1 text-justify line-clamp-3">
+                        {project.description}
+                      </p>
+                      
+                      <div className="flex gap-2 mt-auto">
+                        <button 
+                          onClick={() => setSelectedProject(project)}
+                          className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900 transition-colors text-sm flex items-center justify-center gap-2"
+                        >
+                          <InfoIcon className="w-4 h-4" /> 詳細介紹
+                        </button>
+                        <a 
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 py-2.5 px-4 rounded-xl bg-blue-50 text-blue-600 font-bold hover:bg-blue-600 hover:text-white transition-all text-sm flex items-center justify-center gap-2"
+                        >
+                          前往使用 <ArrowRight className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </main>
+
+          {/* 頁尾 */}
+          <footer className="bg-white border-t border-slate-200 py-8 text-center text-slate-500 text-sm">
+            <p>&copy; {new Date().getFullYear()} My Portfolio. Built with React & Tailwind CSS.</p>
+          </footer>
+
+          {/* 彈出視窗 */}
+          <ProjectModal 
+            project={selectedProject} 
+            onClose={() => setSelectedProject(null)} 
+          />
+        </div>
+      );
+    }
+
+    // 啟動 React 應用
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<PortfolioHub />);
+  </script>
+</body>
+</html>
