@@ -105,6 +105,49 @@
         )
       },
       {
+        id: 'pdf-tool',
+        title: '保誠（非年金）標注工具',
+        description: '專為保險業務設計的智能標註工具。具備數據透視校正、一鍵生成行銷圖表等功能，並支援自由排版與匯出 PDF/PPT 簡報。',
+        icon: <FileText className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://koraner.github.io/Prudential-Non-Annuity-Tagging-Tool/',
+        details: (
+          <div className="space-y-8">
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+              <h4 className="text-amber-800 font-bold text-lg mb-2 flex items-center gap-2">⚠️ 核心限制與事前準備</h4>
+              <p className="text-amber-700 text-sm mb-2">為確保系統能準確解析，上傳檔案請務必符合以下條件：</p>
+              <ul className="list-disc pl-5 text-amber-700 text-sm space-y-1">
+                <li><strong>必須為 PDF 格式：</strong>不支援翻拍照片或掃描圖片。</li>
+                <li><strong>檔案來源與內容：</strong>限制使用 <strong className="text-amber-900">[保誠] EXCEL試算表輸出</strong> 的檔案。</li>
+                <li><strong>特定頁面：</strong>必須包含 <strong className="text-amber-900">[減少保險金額表]</strong>，且僅保留 <strong className="text-amber-900">[中分紅]</strong> 頁面。</li>
+              </ul>
+            </div>
+
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🚀 操作流程</h3>
+              <ol className="list-decimal pl-5 space-y-4 text-slate-700">
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">上傳檔案</span>
+                  將符合條件的 PDF 檔案拖曳至上傳區域，系統會自動轉換並進入編輯模式。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">數據透視與校正 (強大功能)</span>
+                  系統會自動抓取表格數字。若有抓取偏差，可於左側「數據透視」區手動校正對應的欄位（如：年度、年齡、保費等）。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">一鍵生成行銷圖</span>
+                  點擊左側魔法棒按鈕「一鍵生成行銷圖」，系統將自動計算回本期、總領回報與最高增值，並將行銷亮點標註於文件上。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">手動微調與輸出</span>
+                  所有的紅框與文字皆可自由拖拉、縮放或修改內容。確認無誤後，即可點擊頂部按鈕匯出 PDF 或 PPTX。
+                </li>
+              </ol>
+            </section>
+          </div>
+        )
+      },
+      {
         id: 'personality-pro',
         title: '保險業務潛能評測系統 (面試官版)',
         description: '專為保險招募設計的高階測評系統。獨家內建「作答真實性演算法」防範測驗作假，並以 AI 生成專屬面談攻略與施壓話術。',
@@ -215,41 +258,12 @@
         )
       },
       {
-        id: 'pdf-tool-legacy',
-        title: '保誠（非年金）標注工具',
-        description: '針對保險業務設計的傳統 PDF 分析與標註工具。具備自動拆分文字與數據透視校正功能。',
-        icon: <FileText className="w-6 h-6" />,
-        type: 'external',
-        url: 'https://gemini.google.com/share/21ff118ad287',
-        details: (
-          <div className="space-y-8">
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🚀 操作流程</h3>
-              <ol className="list-decimal pl-5 space-y-4 text-slate-700">
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900">準備檔案</span>
-                  確認您的 PDF 建議書已備妥，且僅包含中分紅頁面。
-                </li>
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900">上傳檔案</span>
-                  將 PDF 檔案拖曳至畫面的上傳區域，或點擊按鈕選取檔案。
-                </li>
-                <li className="pl-2">
-                  <span className="font-bold block text-slate-900">自由排版 (拖拉功能)</span>
-                  生成後的畫面中，所有的文字標籤、數值區塊都是可以互動的。
-                </li>
-              </ol>
-            </section>
-          </div>
-        )
-      },
-      {
         id: 'ocr-tool',
         title: '極速數字提取 (OCR)',
         description: '高效的圖片轉表格工具。支援截圖貼上與自動裁切，利用 Gemini 視覺模型快速辨識圖中數值並轉為可複製的表格格式。',
         icon: <TableIcon className="w-6 h-6" />,
         type: 'external',
-        url: 'https://gemini.google.com/share/b71869448855',
+        url: 'https://koraner.github.io/SwiftParse/',
         details: (
           <div className="space-y-8">
             <section>
