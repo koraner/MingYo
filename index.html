@@ -148,9 +148,9 @@
         )
       },
       {
-        id: 'personality-pro',
-        title: '保險業務潛能評測系統 (面試官版)',
-        description: '專為保險招募設計的高階測評系統。獨家內建「作答真實性演算法」防範測驗作假，並以 AI 生成專屬面談攻略與施壓話術。',
+        id: 'personality-portal',
+        title: '人才潛能評測系統',
+        description: '專為保險招募設計的高階雙模式測評系統。支援「遠端發送」與「現場單機」雙模式，內建作答真實性防偽演算法，並由 AI 輔助生成專屬報告。',
         icon: <Brain className="w-6 h-6" />,
         type: 'external',
         url: 'https://koraner.github.io/Personality-Portal-Insight-Pro/',
@@ -160,22 +160,26 @@
               <div className="bg-indigo-50 p-4 rounded-lg mb-6 border border-indigo-100">
                 <p className="text-indigo-900 font-medium italic text-center">「讓招募回歸『人』的本質，用數據看見『心』的驅動力。」</p>
               </div>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💡 面試官專業版初衷</h3>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💡 專案初衷與系統整合</h3>
               <p className="text-slate-700 leading-relaxed">
-                在保險業的高壓招募中，面試官常面臨候選人「過度包裝」的挑戰。此專業版本不僅整合了 7 大測評模組，更引入了<strong>系統作答真實性評估</strong>，透過作答時間與數據矛盾點自動偵測社會期許誤差，確保您拿到的是最真實的人才數據。
+                為滿足不同招募場景的需求，本系統已完美整合<strong>「專業面試官版」</strong>與<strong>「校園徵才版」</strong>。不僅能透過「作答真實性演算法」防範高壓面試中的測驗作假，更能在校園徵才等高流動率場景中，提供一條龍的快速測評與結果展示，讓每一場增員面談都能從「憑感覺」轉變為「憑數據」。
               </p>
             </section>
 
             <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔥 專業版獨家功能</h3>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔥 雙模式與獨家功能</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">🎯 雙軌測評模式</h4>
+                  <p className="text-sm text-slate-600">支援「遠端發送標準版」(產生 Config 代碼) 與「校園徵才單機版」(免代碼即測即看)，靈活應對各種招募情境與博覽會。</p>
+                </div>
                 <div className="bg-rose-50 p-4 rounded-lg border border-rose-100">
                   <h4 className="font-bold text-rose-800 mb-2 flex items-center gap-2">🔍 作答防偽偵測</h4>
                   <p className="text-sm text-rose-700">內建演算法檢測作答速度、直線作答(Straight-lining)與特質矛盾點，自動產出「信任指數」與可疑點警告。</p>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                  <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">🤖 面談攻略 AI 腳本</h4>
-                  <p className="text-sm text-blue-700">自動生成針對性的「施壓提問」、「MDRT 潛質分析」以及發掘助理轉業務的「無痛轉型劇本」。</p>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 md:col-span-2">
+                  <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">🤖 全方位 AI 賦能</h4>
+                  <p className="text-sm text-blue-700">自動生成針對性的「面談攻略與施壓話術」、「新鮮人職涯探索指南」以及發掘助理潛能的「無痛轉型劇本」。</p>
                 </div>
               </div>
             </section>
@@ -184,16 +188,16 @@
               <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🛠️ 操作流程 (SOP)</h3>
               <ol className="list-decimal pl-5 space-y-4 text-slate-700 text-sm">
                 <li className="pl-2">
-                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 1：開啟面試官權限 (God Mode)</span>
-                  進入網站後，連續點擊左上角的 Logo <strong>5 次</strong>，即可解鎖隱藏的管理後台。
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 1：開啟管理員權限 (God Mode)</span>
+                  進入網站後，連續點擊左上角的 Logo <strong>5 次</strong>，即可解鎖隱藏的管理後台菜單。
                 </li>
                 <li className="pl-2">
-                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 2：設定與發送</span>
-                  點擊「建立新測驗」，生成一組 <strong>Config Code</strong> 傳送給求職者。
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 2：選擇模式與設定</span>
+                  依據招募場景，可選擇啟動「校園徵才」現場單機模式（無須發送代碼），或選擇建立新測驗並生成 <strong>Config Code</strong> 進行遠端發送。
                 </li>
                 <li className="pl-2">
-                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 3：解析與驗證</span>
-                  求職者完成測驗回傳 Result Code。您在首頁貼上代碼後，優先查看<strong>「系統作答真實性評估」</strong>，再點擊底部按鈕一鍵生成 AI 分析報告。
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 3：解析與驗證 (標準模式)</span>
+                  求職者完成測驗回傳 Result Code。您在首頁貼上代碼後，優先查看<strong>「系統作答真實性評估」</strong>，再透過底部按鈕一鍵生成 AI 深度分析報告。
                 </li>
               </ol>
             </section>
@@ -209,50 +213,6 @@
                 <span className="p-2 bg-slate-100 rounded">大五人格 Big 5</span>
                 <span className="p-2 bg-slate-100 rounded">Holland 職業興趣</span>
               </div>
-            </section>
-          </div>
-        )
-      },
-      {
-        id: 'personality-campus',
-        title: '人才潛能評測系統 (校園徵才版)',
-        description: '面向校園與年輕族群的輕量化職涯探索工具。透過測評協助新鮮人深層自我覺察，並以 AI 輔助生成專屬的職涯定位指南。',
-        icon: <Users className="w-6 h-6" />,
-        type: 'external',
-        url: 'https://koraner.github.io/Personality-Portal-Future-Spark/',
-        details: (
-          <div className="space-y-8">
-            <section>
-              <div className="bg-emerald-50 p-4 rounded-lg mb-6 border border-emerald-100">
-                <p className="text-emerald-900 font-medium italic text-center">「給年輕世代的自我說明書，探索隱藏的職場天賦。」</p>
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🌱 校園徵才版初衷</h3>
-              <p className="text-slate-700 leading-relaxed">
-                專為校園徵才、實習生招募與社會新鮮人設計的版本。移除了尖銳的面試防偽判定，將重點放在<strong>「職涯探索」</strong>與<strong>「天賦發掘」</strong>，讓測評過程變成一次充滿溫度的免費生涯諮詢，有效提升雇主品牌形象。
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🎯 新鮮人專屬亮點</h3>
-              <ul className="list-disc pl-5 space-y-3 text-slate-700 text-sm">
-                <li><strong>深層自我察覺：</strong> 幫助社會經驗較少的年輕人，釐清自己的核心驅動力 (Outcomes) 與工作價值觀。</li>
-                <li><strong>Holland 適配指南：</strong> 視覺化呈現職涯興趣，解答「我到底適合衝鋒陷陣，還是運籌帷幄？」。</li>
-                <li><strong>AI 成長備忘錄：</strong> 生成專屬的職涯方向建議，並給予克服性格盲點的「原子習慣」方案。</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💻 隱私與技術架構</h3>
-              <ul className="space-y-3 text-slate-700 text-sm">
-                <li className="flex items-start gap-2">
-                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">隱私</span>
-                  <div><strong>純離線架構 (Pure Offline)：</strong>無後端資料庫，新鮮人個資零風險。</div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-slate-900 text-white text-xs px-2 py-0.5 rounded mt-1">便攜</span>
-                  <div><strong>Code-Based 傳輸：</strong>行動裝置友善，用代碼即插即用，無須下載 App。</div>
-                </li>
-              </ul>
             </section>
           </div>
         )
