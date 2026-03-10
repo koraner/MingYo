@@ -1,1527 +1,438 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personality Portal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio Hub</title>
+  
+  <!-- 引入 Tailwind CSS (樣式) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 引入 React 和 React DOM (核心框架) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- 引入 Babel (讓瀏覽器看懂 JSX) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* 自定義捲軸樣式 */
+    .custom-scroller::-webkit-scrollbar { width: 8px; }
+    .custom-scroller::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroller::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroller::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     
-    <!-- 1. Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     
-    <!-- 2. 設定 Tailwind 優先使用芫荽體 (Iansui) -->
-    <script id="tw-config">
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Iansui', 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <!-- 3. React & ReactDOM -->
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-        "lucide-react": "https://esm.sh/lucide-react@0.294.0"
-      }
-    }
-    </script>
-
-    <!-- 4. Babel Standalone & HTML2PDF -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <!-- 自定義樣式 -->
-    <style>
-        /* 載入芫荽體 Iansui */
-        @font-face {
-            font-family: 'Iansui';
-            src: local('芫荽'),
-                 local('Iansui'),
-                 local('Iansui-Regular'),
-                 local('Iansui Regular'),
-                 url('./Iansui-Regular.ttf') format('truetype'),
-                 url('https://cdn.jsdelivr.net/gh/ButTaiwan/iansui/Iansui-Regular.ttf') format('truetype');
-            font-display: swap;
-        }
-
-        body {
-            background-color: #f8fafc; 
-            -webkit-tap-highlight-color: transparent;
-            font-weight: 600;
-        }
-
-        .custom-scroller::-webkit-scrollbar { width: 6px; }
-        .custom-scroller::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroller::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .custom-scroller::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes bounceIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        .animate-bounce-in { animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-
-        .btn-prominent {
-            background-color: #0f172a; 
-            color: white;
-            font-weight: 700;
-            padding: 0.85rem 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .btn-prominent:hover {
-            background-color: #1e293b;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .btn-prominent:active { transform: translateY(0); }
-        .btn-prominent:disabled { opacity: 0.5; transform: none; box-shadow: none; cursor: not-allowed; }
-
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* 列印與 PDF 輸出專用排版 - 終極修復版 */
-        @media print {
-            @page { margin: 10mm; size: A4 portrait; }
-            body { background-color: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .no-print { display: none !important; }
-            #report-container { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
-            /* 防斷頁設定 */
-            .card { page-break-inside: avoid !important; break-inside: avoid !important; margin-bottom: 20px !important; }
-            .page-break-before { page-break-before: always !important; }
-            h1, h2, h3 { page-break-after: avoid !important; break-after: avoid !important; }
-        }
-        
-        /* html2pdf.js 生成時的專用 class，強制固定寬度解決排版跑掉與裁切問題 */
-        .pdf-export-mode {
-            background-color: white !important;
-            padding: 40px 30px !important;
-            width: 820px !important; /* 強制寬度，完美契合 A4 比例 */
-            max-width: 820px !important;
-            margin: 0 auto !important;
-            box-sizing: border-box !important;
-        }
-        .pdf-export-mode .no-print { display: none !important; }
-        .pdf-export-mode #report-container { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; max-width: none !important; }
-        .pdf-export-mode .card { page-break-inside: avoid !important; break-inside: avoid !important; margin-bottom: 24px !important; }
-        .pdf-export-mode .page-break-before { page-break-before: always !important; }
-    </style>
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-slate-50 text-slate-800">
+  <div id="root"></div>
 
-    <!-- 5. 主程式碼 -->
-    <script type="text/babel" data-type="module" data-presets="typescript,react">
-        import React, { useState, useEffect, useMemo } from 'react';
-        import { createRoot } from 'react-dom/client';
-        import { 
-            Shield, User, Play, Settings, CheckCircle, AlertCircle, Copy, Printer, 
-            ArrowRight, Brain, Target, ListOrdered, Plus, X, ChevronUp, ChevronDown, 
-            Calendar, Clock, Briefcase, Lock, PieChart, Activity, Compass, BookOpen, 
-            Edit3, Eye, Layers, FileText, HelpCircle, FilePlus, Info, RefreshCw,
-            Users, TrendingUp, List, Clipboard, Zap, ShieldAlert, Fingerprint, LogOut, Download, Sparkles
-        } from 'lucide-react';
+  <!-- 您的 React 程式碼 -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-        // --- DATA & CONSTANTS ---
-        const DISC_QUESTIONS = [
-            { id: 1, q: "在同事、朋友眼中您是一位？", options: [{ type: "D", text: "積極、熱情、有行動力的人" }, { type: "I", text: "活潑、開朗、風趣幽默的人" }, { type: "S", text: "忠誠、隨和、容易相處的人" }, { type: "C", text: "謹慎、冷靜、注意細節的人" }] },
-            { id: 2, q: "您喜歡看哪一類型的雜誌？", options: [{ type: "D", text: "管理、財經、趨勢類" }, { type: "I", text: "旅遊、美食、時尚類" }, { type: "S", text: "心靈、散文、家庭類" }, { type: "C", text: "科技、專業、藝術類" }] },
-            { id: 3, q: "您做決策的方式？", options: [{ type: "D", text: "希望能立即有效" }, { type: "I", text: "感覺重於一切" }, { type: "S", text: "有時間考慮或尋求他人意見" }, { type: "C", text: "要有詳細的資料評估" }] },
-            { id: 4, q: "職務上哪種工作是我最擅長的？", options: [{ type: "D", text: "以目標為導向，不畏艱難" }, { type: "I", text: "良好溝通，建立關係" }, { type: "S", text: "專注執行，穩定支持" }, { type: "C", text: "分析規劃，建立標準" }] },
-            { id: 5, q: "遇到壓力時，您通常會？", options: [{ type: "D", text: "面對挑戰，直接反擊" }, { type: "I", text: "尋求他人認同或抒發情緒" }, { type: "S", text: "忍耐吞聲，維持和平" }, { type: "C", text: "退縮思考，分析原因" }] },
-            { id: 6, q: "與同事、朋友之間的相處？", options: [{ type: "D", text: "以公事為主，很少談到個人生活" }, { type: "I", text: "重視氣氛，能夠帶動團隊情趣" }, { type: "S", text: "良好的傾聽者，對人態度溫和友善" }, { type: "C", text: "被動，不會主動與人建立關係" }] },
-            { id: 7, q: "您希望別人如何與您溝通？", options: [{ type: "D", text: "直接講重點，不要拐彎抹角" }, { type: "I", text: "輕鬆，不要太嚴肅" }, { type: "S", text: "不要一次說太多，要給予明確的支持" }, { type: "C", text: "凡是說清楚，講明白" }] },
-            { id: 8, q: "要完成一件事情時，您最在意的部份是？", options: [{ type: "D", text: "效果是否有達到" }, { type: "I", text: "過程是否快樂" }, { type: "S", text: "前後是否有改變" }, { type: "C", text: "流程是否正確" }] },
-            { id: 9, q: "您希望別人如何看待您？", options: [{ type: "D", text: "能力強，有影響力" }, { type: "I", text: "受歡迎，有人緣" }, { type: "S", text: "好相處，可信賴" }, { type: "C", text: "專業，有深度" }] },
-            { id: 10, q: "對於變動的環境，您的反應是？", options: [{ type: "D", text: "視為機會，主動出擊" }, { type: "I", text: "能夠適應，只要有趣" }, { type: "S", text: "感到不安，需要時間調適" }, { type: "C", text: "分析利弊，謹慎應對" }] }
-        ];
+    // --- ICON COMPONENTS ---
+    const IconWrapper = ({ children, className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
+    );
+    const Brain = (p) => <IconWrapper {...p}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></IconWrapper>;
+    const Activity = (p) => <IconWrapper {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></IconWrapper>;
+    const FileText = (p) => <IconWrapper {...p}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></IconWrapper>;
+    const TableIcon = (p) => <IconWrapper {...p}><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></IconWrapper>;
+    const Users = (p) => <IconWrapper {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconWrapper>;
+    const Target = (p) => <IconWrapper {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></IconWrapper>;
+    const ExternalLink = (p) => <IconWrapper {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></IconWrapper>;
+    const Briefcase = (p) => <IconWrapper {...p}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></IconWrapper>;
+    const ArrowRight = (p) => <IconWrapper {...p}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></IconWrapper>;
+    const Star = (p) => <IconWrapper {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></IconWrapper>;
+    const XIcon = (p) => <IconWrapper {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconWrapper>;
+    const InfoIcon = (p) => <IconWrapper {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconWrapper>;
+    const Shield = (p) => <IconWrapper {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></IconWrapper>;
 
-        const VALUES_DEFINITIONS = [
-            { id: "升遷", text: "地位、名望、職銜" }, { id: "自主性", text: "不喜歡被人管、自我管理強" },
-            { id: "待遇", text: "收入、薪水" }, { id: "成就感", text: "在工作中得到的肯定" },
-            { id: "環境", text: "職場、家庭" }, { id: "同事", text: "人際關係" }, { id: "自我成長", text: "學習、進修" }
-        ];
+    // ==============================================
+    // 1. 專案資料設定區 (含詳細內容 HTML)
+    // ==============================================
+    const projectsData = [
+      {
+        id: 'policy-viz',
+        title: '建議書視覺化程式',
+        description: '將生硬的保險建議書 PDF 自動解析，轉化為直覺的互動式走勢圖，讓客戶一眼看懂保單回本期與價值增長趨勢。',
+        icon: <Activity className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://koraner.github.io/Policy-Vision-Logic/',
+        details: (
+          <div className="space-y-8">
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+              <h4 className="text-amber-800 font-bold text-lg mb-2 flex items-center gap-2">⚠️ 核心限制與事前準備</h4>
+              <p className="text-amber-700 text-sm mb-2">在使用系統之前，請確認您的建議書檔案符合以下三個關鍵條件，否則可能導致讀取失敗或數據錯誤：</p>
+              <ul className="list-disc pl-5 text-amber-700 text-sm space-y-1">
+                <li><strong>必須為 PDF 格式：</strong>系統僅支援 PDF 電子檔，不支援翻拍照片或掃描圖片。</li>
+                <li><strong>必須包含特定表格：</strong>您的建議書中，必須包含 「減少保險金額影響表」。</li>
+                <li><strong>僅需中分紅頁面：</strong>在輸出建議書 PDF 時，請只保留「中分紅」的頁面。</li>
+              </ul>
+            </div>
 
-        const VALUES_PAIRS = [
-            { A: "升遷", B: "自主性" }, { A: "自我成長", B: "升遷" }, { A: "同事", B: "自我成長" },
-            { A: "環境", B: "待遇" }, { A: "待遇", B: "升遷" }, { A: "自我成長", B: "成就感" },
-            { A: "待遇", B: "自我成長" }, { A: "待遇", B: "成就感" }, { A: "自主性", B: "待遇" },
-            { A: "成就感", B: "自主性" }, { A: "自主性", B: "自我成長" }, { A: "自我成長", B: "環境" },
-            { A: "升遷", B: "環境" }, { A: "成就感", B: "升遷" }, { A: "環境", B: "同事" },
-            { A: "成就感", B: "環境" }, { A: "升遷", B: "同事" }, { A: "同事", B: "成就感" },
-            { A: "同事", B: "待遇" }, { A: "自主性", B: "同事" }, { A: "環境", B: "自主性" }
-        ];
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔍 產品概述</h3>
+              <p className="text-slate-700 leading-relaxed text-sm">
+                專為保險從業人員設計的視覺化輔助工具。解決了客戶在面對密密麻麻數字表格時的理解障礙，透過 PDF.js 自動擷取「年齡」、「累積保費」、「保險額度」與「解約金」等關鍵欄位，並即時繪製成動態折線圖，清楚呈現損益平衡點。
+              </p>
+            </section>
 
-        // 確保與提供的檔案文字完全一致，並補上問卷內容
-        const OUTCOMES_ITEMS = [
-            { id: "O1", term: "獨立", desc: "依照自己的意願運作自己的業務，做自己的老闆。", questions: ["• 你曾感到被限制？", "• 你覺得被規定和繁瑣手續打敗嗎？", "• 你是否經常與主管意見不同？"] },
-            { id: "O2", term: "受肯定", desc: "工作表現優良，能得到別人的讚賞，如在公開場合或演講中被表揚。", questions: ["• 「贏」對您而言有多重要？", "• 當別人獲得肯定時，你的感覺如何？", "• 為了贏得肯定，你會全力以赴嗎？"] },
-            { id: "O3", term: "成就感", desc: "這種感覺來自於你成功的完成工作，克服了阻礙且達到目標。", questions: ["• 你的表現與你所付出的努力相當嗎？", "• 當你完成一項工作時心中的感覺如何？", "• 你為自己設立什麼樣的目標？"] },
-            { id: "O4", term: "休閒時間", desc: "休閒時間對你而言是非常必要的嗎？你能依自己的意願自由運用時間，並從中獲得樂趣。", questions: ["• 休閒時間對你而言是非常必要的嗎？", "• 你能從休閒時間中獲得很大樂趣嗎？", "• 你真的很喜歡休閒時間嗎？"] },
-            { id: "O5", term: "權力", desc: "是一種掌握自己亦掌握別人命運的感覺，是一種可以指導別人行為，具備影響力的感覺。", questions: ["• 你感到已掌握了自己的命運嗎？", "• 別人常會來詢問你或等待你的指示嗎？", "• 你是否在做一些自己不想做的事？"] },
-            { id: "O6", term: "聲望", desc: "代表著同輩、同事、所屬的社團對你的尊重，並認為你是十分出眾的人物。", questions: ["• 聲望對你而言是重要的嗎？", "• 別人尊敬你嗎？", "• 你常常在做一些為贏得尊敬的事嗎？"] },
-            { id: "O7", term: "金錢", desc: "藉由工作所獲得的財務收入。", questions: ["• 你對你的收入感到自豪嗎？", "• 你喜歡與人談及金錢或你的消費、儲蓄、投資嗎？"] },
-            { id: "O8", term: "挑戰", desc: "隨時要求自己繼續不斷提高工作表現的感覺或動力。", questions: ["• 未盡全力時你是否會有罪惡感？", "• 你是否經常感覺自己應更下工夫？", "• 你是否需要主管給你激勵？"] },
-            { id: "O9", term: "自尊", desc: "自認為比同儕中其他成員優秀的程度。", questions: ["• 你對於自己的能力及作為有信心嗎？", "• 你會因不好的表現而感到罪惡感嗎？", "• 你對自己的表現感到滿意？"] },
-            { id: "O10", term: "家庭生活", desc: "與家人共同相處的時間與共度家庭快樂時光的品質。", questions: ["• 你是否花了很多時間與家人相處？夠嗎？", "• 和家人相處的時光值得嗎？", "• 家人會期待與你相處的時間嗎？"] },
-            { id: "O11", term: "安全感", desc: "重視工作與經濟來源的穩定性。", questions: ["• 工作的保障感覺對你來說重要嗎？", "• 你會害怕去嘗試一些新的事物嗎？", "• 你是否為了確保工作而作一些必要措施？"] },
-            { id: "O12", term: "個人成長", desc: "變得更有能力、更有效率、更為優秀的一種個人成長感覺。", questions: ["• 過去一年來，你自認有成長嗎？", "• 你是否有做些事情來促進個人成長？", "• 是否有計畫去多做些事？"] }
-        ];
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">✨ 核心亮點</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">一鍵精準解析</h4>
+                  <p className="text-sm text-slate-600">上傳 PDF 即可自動對齊表格、過濾雜訊並提取數值。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">直覺走勢圖表</h4>
+                  <p className="text-sm text-slate-600">利用 Recharts 繪製，支援數據 Tooltip 預覽，最高呈現至 109 歲。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">損益黃金交叉</h4>
+                  <p className="text-sm text-slate-600">綠線(成本)與紅線(價值)對比，秒懂保單何時開始回本與增值。</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'pdf-tool',
+        title: '保誠（非年金）標注工具',
+        description: '專為保險業務設計的智能標註工具。具備數據透視校正、一鍵生成行銷圖表等功能，並支援自由排版與匯出 PDF/PPT 簡報。',
+        icon: <FileText className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://koraner.github.io/Prudential-Non-Annuity-Tagging-Tool/',
+        details: (
+          <div className="space-y-8">
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+              <h4 className="text-amber-800 font-bold text-lg mb-2 flex items-center gap-2">⚠️ 核心限制與事前準備</h4>
+              <p className="text-amber-700 text-sm mb-2">為確保系統能準確解析，上傳檔案請務必符合以下條件：</p>
+              <ul className="list-disc pl-5 text-amber-700 text-sm space-y-1">
+                <li><strong>必須為 PDF 格式：</strong>不支援翻拍照片或掃描圖片。</li>
+                <li><strong>檔案來源與內容：</strong>限制使用 <strong className="text-amber-900">[保誠] EXCEL試算表輸出</strong> 的檔案。</li>
+                <li><strong>特定頁面：</strong>必須包含 <strong className="text-amber-900">[減少保險金額表]</strong>，且僅保留 <strong className="text-amber-900">[中分紅]</strong> 頁面。</li>
+              </ul>
+            </div>
 
-        const TRAITS_LIST = [
-            "我能盡責任", "我有信心", "我有創造力", "我有勇氣", "我會採取主動", "我有說服力",
-            "我能和別人溝通", "我有毅力", "我有決心", "我長的不錯", "我很健康", "我有豐富的資源",
-            "我善於聆聽", "我需要錢", "我有好的技術能力", "我有警覺性", "我熱情", "我有野心",
-            "我有知名度", "我有刻苦的精神", "我有條理", "我是可教之才", "我有時間觀念", "我有個性",
-            "我有責任心", "我有團隊精神", "我很堅定", "我追求目標", "我有很強的適應能力", "我受過良好的教育",
-            "我是可靠的", "我有很強的學習能力", "我對財務管理有一套", "我的精力充沛", "我能堅定立場"
-        ];
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🚀 操作流程</h3>
+              <ol className="list-decimal pl-5 space-y-4 text-slate-700">
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">上傳檔案</span>
+                  將符合條件的 PDF 檔案拖曳至上傳區域，系統會自動轉換並進入編輯模式。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">數據透視與校正 (強大功能)</span>
+                  系統會自動抓取表格數字。若有抓取偏差，可於左側「數據透視」區手動校正對應的欄位（如：年度、年齡、保費等）。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">一鍵生成行銷圖</span>
+                  點擊左側魔法棒按鈕「一鍵生成行銷圖」，系統將自動計算回本期、總領回報與最高增值，並將行銷亮點標註於文件上。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900">手動微調與輸出</span>
+                  所有的紅框與文字皆可自由拖拉、縮放或修改內容。確認無誤後，即可點擊頂部按鈕匯出 PDF 或 PPTX。
+                </li>
+              </ol>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'personality-portal',
+        title: '人才潛能評測系統',
+        description: '專為保險招募設計的高階雙模式測評系統。支援「遠端發送」與「現場單機」雙模式，內建作答真實性防偽演算法，並由 AI 輔助生成專屬報告。',
+        icon: <Brain className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://koraner.github.io/Personality-Portal-Insight-Pro/',
+        details: (
+          <div className="space-y-8">
+            <section>
+              <div className="bg-indigo-50 p-4 rounded-lg mb-6 border border-indigo-100">
+                <p className="text-indigo-900 font-medium italic text-center">「讓招募回歸『人』的本質，用數據看見『心』的驅動力。」</p>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">💡 專案初衷與系統整合</h3>
+              <p className="text-slate-700 leading-relaxed">
+                為滿足不同招募場景的需求，本系統已完美整合<strong>「專業面試官版」</strong>與<strong>「校園徵才版」</strong>。不僅能透過「作答真實性演算法」防範高壓面試中的測驗作假，更能在校園徵才等高流動率場景中，提供一條龍的快速測評與結果展示，讓每一場增員面談都能從「憑感覺」轉變為「憑數據」。
+              </p>
+            </section>
 
-        const ENNEAGRAM_QUESTIONS = [
-            { id: 1, type: "1", text: "我對自己要求很高，事情不做則已，要做就要做到完美。" }, { id: 2, type: "1", text: "我容易看到錯誤和不完美，並且很想去糾正它們。" },
-            { id: 3, type: "2", text: "我喜歡幫助別人，覺得被需要是一種幸福。" }, { id: 4, type: "2", text: "我常把別人的需求放在自己之前，有時會忽略了自己的感受。" },
-            { id: 5, type: "3", text: "我非常重視目標和效率，喜歡競爭並贏得勝利。" }, { id: 6, type: "3", text: "我希望成為眾人目光的焦點，被別人讚賞和肯定。" },
-            { id: 7, type: "4", text: "我覺得自己很獨特，別人不容易真正了解我。" }, { id: 8, type: "4", text: "我的情緒起伏比較大，對於美感和氣氛很敏感。" },
-            { id: 9, type: "5", text: "我喜歡獨處思考，去深入研究感興趣的知識。" }, { id: 10, type: "5", text: "我對於過度的社交活動感到疲憊，需要保有私人空間。" },
-            { id: 11, type: "6", text: "我做事比較謹慎，會預先設想可能發生的危險或問題。" }, { id: 12, type: "6", text: "我很重視團體歸屬感，對信任的朋友或權威非常忠誠。" },
-            { id: 13, type: "7", text: "我喜歡新鮮有趣的事物，討厭沉悶和束縛。" }, { id: 14, type: "7", text: "我是個樂觀主義者，總能從負面事情中看到正面的一面。" },
-            { id: 15, type: "8", text: "我說話直接，不喜歡拐彎抹角，喜歡掌握主導權。" }, { id: 16, type: "8", text: "當遇到不公義的事情時，我會挺身而出捍衛自己或他人。" },
-            { id: 17, type: "9", text: "我不喜歡衝突，通常會順著別人的意思以維持和諧。" }, { id: 18, type: "9", text: "我有時會拖延，對於要做決定的事情感到壓力。" }
-        ];
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔥 雙模式與獨家功能</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                  <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">🎯 雙軌測評模式</h4>
+                  <p className="text-sm text-slate-600">支援「遠端發送標準版」(產生 Config 代碼) 與「校園徵才單機版」(免代碼即測即看)，靈活應對各種招募情境與博覽會。</p>
+                </div>
+                <div className="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                  <h4 className="font-bold text-rose-800 mb-2 flex items-center gap-2">🔍 作答防偽偵測</h4>
+                  <p className="text-sm text-rose-700">內建演算法檢測作答速度、直線作答(Straight-lining)與特質矛盾點，自動產出「信任指數」與可疑點警告。</p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 md:col-span-2">
+                  <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">🤖 全方位 AI 賦能</h4>
+                  <p className="text-sm text-blue-700">自動生成針對性的「面談攻略與施壓話術」、「新鮮人職涯探索指南」以及發掘助理潛能的「無痛轉型劇本」。</p>
+                </div>
+              </div>
+            </section>
 
-        const BIG5_QUESTIONS = [
-            { id: 1, dim: "E", rev: false, text: "我認為自己是：外向、熱情的人" }, { id: 2, dim: "A", rev: true,  text: "我認為自己是：挑剔、好爭論的人" },
-            { id: 3, dim: "C", rev: false, text: "我認為自己是：可靠、自律的人" }, { id: 4, dim: "N", rev: false, text: "我認為自己是：焦慮、容易心煩的人" },
-            { id: 5, dim: "O", rev: false, text: "我認為自己是：體驗豐富、思想開放的人" }, { id: 6, dim: "E", rev: true,  text: "我認為自己是：內向、安靜的人" },
-            { id: 7, dim: "A", rev: false, text: "我認為自己是：有同情心、溫暖的人" }, { id: 8, dim: "C", rev: true,  text: "我認為自己是：雜亂、粗心的人" },
-            { id: 9, dim: "N", rev: true,  text: "我認為自己是：冷靜、情緒穩定的人" }, { id: 10,dim: "O", rev: true,  text: "我認為自己是：傳統、缺乏創造力的人" }
-        ];
-
-        const HOLLAND_ACTIVITIES = [
-            { type: "R", text: "修理電器或機械" }, { type: "R", text: "種植花草或飼養動物" }, { type: "R", text: "組裝模型或傢俱" }, { type: "R", text: "戶外體能活動" }, { type: "R", text: "使用工具操作" },
-            { type: "I", text: "閱讀科技或科學雜誌" }, { type: "I", text: "解決數學或邏輯問題" }, { type: "I", text: "進行實驗或研究" }, { type: "I", text: "分析複雜的事物" }, { type: "I", text: "學習新的電腦程式" },
-            { type: "A", text: "繪畫、攝影或設計" }, { type: "A", text: "欣賞音樂或演奏樂器" }, { type: "A", text: "閱讀文學作品或寫作" }, { type: "A", text: "觀賞戲劇或電影" }, { type: "A", text: "設計室內裝飾" },
-            { type: "S", text: "教導或訓練他人" }, { type: "S", text: "照顧生病或年長的人" }, { type: "S", text: "參與志工服務" }, { type: "S", text: "與朋友聚會聊天" }, { type: "S", text: "協助解決他人煩惱" },
-            { type: "E", text: "說服他人接受觀點" }, { type: "E", text: "擔任領導者或幹部" }, { type: "E", text: "推銷產品或想法" }, { type: "E", text: "規劃創業或投資" }, { type: "E", text: "發表演說或簡報" },
-            { type: "C", text: "整理檔案或資料" }, { type: "C", text: "處理文書或會計工作" }, { type: "C", text: "制定詳細的計畫表" }, { type: "C", text: "按部就班完成任務" }, { type: "C", text: "遵守規則與程序" }
-        ];
-
-        const DISC_ANIMALS = {
-            D: { animal: "老虎", type: "支配型", traits: "目標導向、果斷、掌控", desc: "天生的領導者，決策迅速，但可能缺乏耐心。重視結果與效率。" },
-            I: { animal: "孔雀", type: "影響型", traits: "樂觀、熱情、社交", desc: "團隊的氣氛製造者，善於溝通，但可能忽略細節。重視人際關係與認同。" },
-            S: { animal: "無尾熊", type: "穩健型", traits: "耐心、支持、和諧", desc: "忠誠的執行者，配合度高，但可能抗拒改變。重視穩定與和平。" },
-            C: { animal: "貓頭鷹", type: "分析型", traits: "精準、邏輯、謹慎", desc: "完美的規劃者，重視邏輯，但可能過於吹毛求疵。重視程序與品質。" }
-        };
-
-        const ENNEAGRAM_TYPES = {
-            "1": { name: "完美型", desc: "追求原則與完美" }, "2": { name: "助人型", desc: "渴望被需要與愛" },
-            "3": { name: "成就型", desc: "追求成功與形象" }, "4": { name: "自我型", desc: "追求獨特與深情" },
-            "5": { name: "理智型", desc: "追求知識與空間" }, "6": { name: "忠誠型", desc: "追求安全與歸屬" },
-            "7": { name: "活躍型", desc: "追求快樂與體驗" }, "8": { name: "領袖型", desc: "追求掌控與正義" },
-            "9": { name: "和平型", desc: "追求和諧與平靜" }
-        };
-
-        const BIG5_LABELS = {
-            O: { name: "開放性 (Openness)", desc: "想像力、好奇心" }, C: { name: "盡責性 (Conscientiousness)", desc: "自律、目標導向" },
-            E: { name: "外向性 (Extraversion)", desc: "熱情、社交活力" }, A: { name: "宜人性 (Agreeableness)", desc: "信任、利他" },
-            N: { name: "神經質 (Neuroticism)", desc: "敏感、情緒波動" }
-        };
-
-        const HOLLAND_LABELS = {
-            R: { name: "實做型 (Realistic)", desc: "動手操作、重視具體" }, I: { name: "研究型 (Investigative)", desc: "思考分析、解決問題" },
-            A: { name: "藝術型 (Artistic)", desc: "創新直覺、自我表達" }, S: { name: "社交型 (Social)", desc: "助人教導、重視關係" },
-            E: { name: "企業型 (Enterprising)", desc: "領導說服、追求成就" }, C: { name: "事務型 (Conventional)", desc: "按部就班、重視精確" }
-        };
-
-        const MODULES_MAP = ['disc', 'values', 'outcomes', 'traits', 'enneagram', 'big5', 'holland'];
-
-        // --- DEMO REALISTIC DATA ---
-        const DEMO_CANDIDATE = { name: '林宇翔', dob: '1996-08-15' };
-        const DEMO_ANSWERS = {
-            disc: { D: 4, I: 5, S: 1, C: 0 },
-            values: { "待遇": 6, "成就感": 5, "自主性": 4, "升遷": 3, "自我成長": 2, "同事": 1, "環境": 0 },
-            outcomes: [
-                OUTCOMES_ITEMS.find(x => x.id === "O7"), // 金錢
-                OUTCOMES_ITEMS.find(x => x.id === "O1"), // 獨立
-                OUTCOMES_ITEMS.find(x => x.id === "O3"), // 成就感
-                OUTCOMES_ITEMS.find(x => x.id === "O8"), // 挑戰
-                OUTCOMES_ITEMS.find(x => x.id === "O2"), // 受肯定
-                OUTCOMES_ITEMS.find(x => x.id === "O12"),// 個人成長
-                OUTCOMES_ITEMS.find(x => x.id === "O5"), // 權力
-                OUTCOMES_ITEMS.find(x => x.id === "O6"), // 聲望
-                OUTCOMES_ITEMS.find(x => x.id === "O9"), // 自尊
-                OUTCOMES_ITEMS.find(x => x.id === "O4"), // 休閒時間
-                OUTCOMES_ITEMS.find(x => x.id === "O10"),// 家庭生活
-                OUTCOMES_ITEMS.find(x => x.id === "O11") // 安全感
-            ],
-            traits: ["我有野心", "我有信心", "我熱情", "我能和別人溝通", "我有說服力", "我追求目標", "我會採取主動", "我很堅定", "我的精力充沛", "我能盡責任", "我是可靠的"],
-            enneagram: { "1": 3, "2": 4, "3": 8, "4": 2, "5": 2, "6": 3, "7": 5, "8": 6, "9": 2 },
-            big5: { E: 12, A: 8, C: 11, N: 4, O: 10 },
-            holland: { R: 1, I: 2, A: 2, S: 4, E: 5, C: 1 }
-        };
-
-        // --- ENCODE / DECODE (標準版用) ---
-        const compress = (data) => {
-            if (!data) return data;
-            if (data.modules && data.timestamp && !data.answers) {
-                const mIdx = data.modules.map((m) => MODULES_MAP.indexOf(m));
-                return { v: 2, t: 'c', d: [mIdx, data.timestamp] };
-            }
-            if (data.answers && data.candidate) {
-                const c = [data.candidate.name, data.candidate.dob];
-                const a = {};
-                const ans = data.answers;
-                if (ans.disc) a.d = [ans.disc.D || 0, ans.disc.I || 0, ans.disc.S || 0, ans.disc.C || 0];
-                if (ans.values) {
-                    a.v = Object.entries(ans.values).map(([k, v]) => {
-                        const idx = VALUES_DEFINITIONS.findIndex(def => def.id === k);
-                        return idx >= 0 ? [idx, v] : null;
-                    }).filter(Boolean);
-                }
-                if (ans.outcomes) a.o = ans.outcomes.map((item) => OUTCOMES_ITEMS.findIndex(def => def.id === item.id));
-                if (ans.traits) a.t = ans.traits.map((t) => TRAITS_LIST.indexOf(t)).filter((i) => i >= 0);
-                if (ans.enneagram) a.e = Array.from({length: 9}, (_, i) => ans.enneagram[String(i + 1)] || 0);
-                if (ans.big5) a.b = [ans.big5.O || 0, ans.big5.C || 0, ans.big5.E || 0, ans.big5.A || 0, ans.big5.N || 0];
-                if (ans.holland) a.h = [ans.holland.R || 0, ans.holland.I || 0, ans.holland.A || 0, ans.holland.S || 0, ans.holland.E || 0, ans.holland.C || 0];
-                const mIdx = data.config?.modules?.map((m) => MODULES_MAP.indexOf(m)) || [];
-                return { v: 2, t: 'r', d: [c, a, mIdx, data.completedAt] };
-            }
-            return data;
-        };
-
-        const decompress = (data) => {
-            if (!data || data.v !== 2) return data;
-            if (data.t === 'c') {
-                const [mIdx, timestamp] = data.d;
-                return { modules: mIdx.map((i) => MODULES_MAP[i]), timestamp };
-            }
-            if (data.t === 'r') {
-                const [c, a, mIdx, completedAt] = data.d;
-                const candidate = { name: c[0], dob: c[1] };
-                const config = { modules: mIdx.map((i) => MODULES_MAP[i]) };
-                const answers = {};
-                if (a.d) answers.disc = { D: a.d[0], I: a.d[1], S: a.d[2], C: a.d[3] };
-                if (a.v) {
-                    answers.values = {};
-                    a.v.forEach(([i, val]) => { if (VALUES_DEFINITIONS[i]) answers.values[VALUES_DEFINITIONS[i].id] = val; });
-                }
-                if (a.o) answers.outcomes = a.o.map((i) => OUTCOMES_ITEMS[i]).filter(Boolean);
-                if (a.t) answers.traits = a.t.map((i) => TRAITS_LIST[i]).filter(Boolean);
-                if (a.e) { answers.enneagram = {}; a.e.forEach((val, i) => answers.enneagram[String(i + 1)] = val); }
-                if (a.b) answers.big5 = { O: a.b[0], C: a.b[1], E: a.b[2], A: a.b[3], N: a.b[4] };
-                if (a.h) answers.holland = { R: a.h[0], I: a.h[1], A: a.h[2], S: a.h[3], E: a.h[4], C: a.h[5] };
-                return { candidate, config, answers, completedAt };
-            }
-            return data;
-        };
-
-        const safeEncode = (data) => {
-            try { return btoa(Array.from(new TextEncoder().encode(JSON.stringify(compress(data))), (byte) => String.fromCodePoint(byte)).join("")); } 
-            catch (e) { return ""; }
-        };
-
-        const safeDecode = (str) => {
-            if (!str) return null;
-            try {
-                let decodedData = null;
-                try { decodedData = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(str.trim()), (c) => c.codePointAt(0)))); } 
-                catch (e) { decodedData = JSON.parse(decodeURIComponent(escape(atob(str.trim())))); }
-                return decompress(decodedData);
-            } catch (e2) { return null; }
-        };
-
-        // --- UTILS ---
-        const handleCopyText = (text, onSuccess, onError) => {
-            try {
-                const textArea = document.createElement("textarea");
-                textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-9999px"; textArea.style.top = "0";
-                document.body.appendChild(textArea); textArea.focus(); textArea.select();
-                const successful = document.execCommand('copy');
-                document.body.removeChild(textArea);
-                if (successful) { if (onSuccess) onSuccess(); } else { if (onError) onError(); }
-            } catch (err) { if (onError) onError(); }
-        };
-
-        // 全域列印函數
-        const handleSafePrint = (setToast, candidateName) => {
-            const printContent = document.getElementById('report-container');
-            if (!printContent) return;
-            const win = window.open('', '', 'height=842,width=595');
-            if (!win) { if(setToast) setToast({ show: true, msg: "列印視窗被阻擋，請允許彈跳視窗", type: "error" }); return; }
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🛠️ 操作流程 (SOP)</h3>
+              <ol className="list-decimal pl-5 space-y-4 text-slate-700 text-sm">
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 1：開啟管理員權限 (God Mode)</span>
+                  進入網站後，連續點擊左上角的 Logo <strong>5 次</strong>，即可解鎖隱藏的管理後台菜單。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 2：選擇模式與設定</span>
+                  依據招募場景，可選擇啟動「校園徵才」現場單機模式（無須發送代碼），或選擇建立新測驗並生成 <strong>Config Code</strong> 進行遠端發送。
+                </li>
+                <li className="pl-2">
+                  <span className="font-bold block text-slate-900 text-base mb-1">步驟 3：解析與驗證 (標準模式)</span>
+                  求職者完成測驗回傳 Result Code。您在首頁貼上代碼後，優先查看<strong>「系統作答真實性評估」</strong>，再透過底部按鈕一鍵生成 AI 深度分析報告。
+                </li>
+              </ol>
+            </section>
             
-            const docTitle = `性格分析報告 - ${candidateName || '未知姓名'} - ${new Date().toLocaleDateString().replace(/\//g, '-')}`;
-            
-            let styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-                                .map(el => el.outerHTML)
-                                .join('\n');
-                                
-            const baseHref = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            styles = styles.replace(/\.\/Iansui-Regular\.ttf/g, baseHref + 'Iansui-Regular.ttf');
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🧩 整合 7 大模組</h3>
+              <div className="flex flex-wrap gap-2 text-sm text-slate-600">
+                <span className="p-2 bg-slate-100 rounded">DISC 行為風格</span>
+                <span className="p-2 bg-slate-100 rounded">工作價值觀 Values</span>
+                <span className="p-2 bg-slate-100 rounded">核心驅動力 Outcomes</span>
+                <span className="p-2 bg-slate-100 rounded">成功特質 Traits</span>
+                <span className="p-2 bg-slate-100 rounded">九型人格 Enneagram</span>
+                <span className="p-2 bg-slate-100 rounded">大五人格 Big 5</span>
+                <span className="p-2 bg-slate-100 rounded">Holland 職業興趣</span>
+              </div>
+            </section>
+          </div>
+        )
+      },
+      {
+        id: 'ocr-tool',
+        title: '極速數字提取 (OCR)',
+        description: '高效的圖片轉表格工具。支援截圖貼上與自動裁切，利用 Gemini 視覺模型快速辨識圖中數值並轉為可複製的表格格式。',
+        icon: <TableIcon className="w-6 h-6" />,
+        type: 'external',
+        url: 'https://koraner.github.io/SwiftParse/',
+        details: (
+          <div className="space-y-8">
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🔍 產品概述</h3>
+              <p className="text-slate-700 leading-relaxed">
+                這是一款專為數據輸入與財務對照設計的智慧工具。結合網頁技術與 Gemini AI 視覺引擎，讓使用者能從圖片、截圖中精準提取數字，並自動轉化為可編輯的表格格式。
+              </p>
+            </section>
 
-            const twConfig = document.getElementById('tw-config') ? document.getElementById('tw-config').outerHTML : '';
-            
-            // 使用字串相加避免 html parser 提前截斷 script
-            win.document.write(
-                '<!DOCTYPE html>\n' +
-                '<html>\n' +
-                '<head>\n' +
-                '    <title>' + docTitle + '</title>\n' +
-                '    <script src="https://cdn.tailwindcss.com"><' + '/script>\n' +
-                '    ' + twConfig + '\n' +
-                '    ' + styles + '\n' +
-                '    <style>\n' +
-                '        @media print { @page { margin: 10mm; size: A4 portrait; } }\n' +
-                '        body { padding: 30px; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-family: "Iansui", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif !important; font-weight: 600; }\n' +
-                '        .no-print { display: none !important; }\n' +
-                '        .print-only { display: block !important; }\n' +
-                '        #report-container { box-shadow: none !important; border: none !important; margin: 0 !important; max-width: 100% !important; padding: 0 !important; width: 100% !important; }\n' +
-                '        .card { page-break-inside: avoid !important; break-inside: avoid !important; margin-bottom: 20px !important; }\n' +
-                '        .page-break-before { page-break-before: always !important; }\n' +
-                '        h1, h2, h3 { page-break-after: avoid !important; break-after: avoid !important; }\n' +
-                '    </style>\n' +
-                '</head>\n' +
-                '<body>\n' +
-                '    ' + printContent.outerHTML + '\n' +
-                '    <div style="margin-top:20px; font-size:12px; color:#666; text-align:center;">Personality Portal Analysis Report • Generated on ' + new Date().toLocaleString() + '</div>\n' +
-                '    <script>\n' +
-                '        window.onload = function() {\n' +
-                '            setTimeout(() => { window.print(); window.close(); }, 800);\n' +
-                '        };\n' +
-                '    <' + '/script>\n' +
-                '</body>\n' +
-                '</html>'
-            );
-            win.document.close();
-        };
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">✨ 核心亮點</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">跨平台優化</h4>
+                  <p className="text-sm text-slate-600">自動偵測 Windows/Mac，支援 Cmd+V 或 Ctrl+V 貼上截圖。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">智慧區域選取</h4>
+                  <p className="text-sm text-slate-600">支援滑鼠拖曳裁切，只辨識需要的欄位，大幅提升準確度。</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h4 className="font-bold text-slate-900 mb-2">Excel 高度相容</h4>
+                  <p className="text-sm text-slate-600">一鍵複製 TSV 格式，可直接貼上至 Excel、Google Sheets。</p>
+                </div>
+              </div>
+            </section>
 
-        // --- SUB-COMPONENTS ---
-        const RadarChart = ({ data, size = 200, color = "#4f46e5" }) => {
-            const count = data.length; const center = size / 2; const radius = (size / 2) - 45; const angleStep = (Math.PI * 2) / count;
-            const getCoordinates = (value, index, maxVal) => {
-                const angle = index * angleStep - Math.PI / 2; const r = (value / maxVal) * radius;
-                return { x: center + r * Math.cos(angle), y: center + r * Math.sin(angle) };
-            };
-            const chartMax = Math.max(Math.max(...data.map((d) => d.value), 1), 5);
-            const gridPolygons = [0.33, 0.66, 1].map(level => data.map((_, i) => { const { x, y } = getCoordinates(level * chartMax, i, chartMax); return `${x},${y}`; }).join(" "));
-            const polygonPoints = data.map((d, i) => { const { x, y } = getCoordinates(d.value, i, chartMax); return `${x},${y}`; }).join(" ");
-            
-            return (
-                <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible">
-                {gridPolygons.map((points, i) => <polygon key={i} points={points} fill="none" stroke="#e2e8f0" strokeWidth="1" />)}
-                {data.map((_, i) => { const { x, y } = getCoordinates(chartMax, i, chartMax); return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="#e2e8f0" strokeWidth="1" />; })}
-                <polygon points={polygonPoints} fill={color} fillOpacity="0.2" stroke={color} strokeWidth="2" />
-                {data.map((d, i) => { const { x, y } = getCoordinates(d.value, i, chartMax); return <circle key={i} cx={x} cy={y} r="3" fill={color} />; })}
-                {data.map((d, i) => {
-                    const angle = i * angleStep - Math.PI / 2; const r = radius + 25;
-                    return <text key={i} x={center + r * Math.cos(angle)} y={center + r * Math.sin(angle)} textAnchor="middle" dominantBaseline="middle" className="text-[12px] fill-slate-600 font-black" style={{fontSize: '12px'}}>{d.label}</text>;
-                })}
-                </svg>
-            );
-        };
+            <section>
+              <h3 className="text-xl font-bold text-slate-900 border-b pb-2 mb-4">🛠️ 操作指南</h3>
+              <ol className="list-decimal pl-5 space-y-3 text-slate-700">
+                <li><strong>輸入圖片：</strong>使用快捷鍵直接貼上截圖，或點擊上傳按鈕。</li>
+                <li><strong>選取區域：</strong>圖片出現後，使用滑鼠拖曳框選出您想要辨識的數字範圍 (排除雜訊)。</li>
+                <li><strong>確認辨識：</strong>點擊「立即辨識」，AI 將自動解析。</li>
+                <li><strong>複製數據：</strong>辨識結果顯示於右側，點擊「複製表格」即可貼往您的工作軟體。</li>
+              </ol>
+            </section>
+          </div>
+        )
+      }
+    ];
 
-        function DiscModule({ onFinish, isLastStep, isCampusMode }) {
-            const [responses, setResponses] = useState({});
-            const isComplete = DISC_QUESTIONS.every(q => responses[q.id]);
-            return (
-                <div className="space-y-8 animate-fade-in">
-                <div className="bg-slate-50 border-l-4 border-slate-600 p-4 text-slate-700 font-bold text-sm">請在每一題中，選擇一個最符合您狀況的描述。</div>
-                {DISC_QUESTIONS.map((q, i) => (
-                    <div key={q.id} className="space-y-4">
-                    <h3 className="font-extrabold text-lg text-slate-800">{i + 1}. {q.q}</h3>
-                    <div className={`grid grid-cols-1 ${isCampusMode ? 'sm:grid-cols-2' : 'md:grid-cols-2'} gap-3`}>
-                        {q.options.map(opt => (
-                        <button key={opt.type} onClick={() => setResponses({...responses, [q.id]: opt.type})} className={`text-left ${isCampusMode ? 'p-5 active:scale-[0.98]' : 'p-4'} rounded-lg border transition-all font-bold ${responses[q.id] === opt.type ? 'bg-slate-800 text-white border-slate-800 shadow-md' : 'bg-white border-gray-200 text-slate-600 hover:bg-gray-50'}`}>{opt.text}</button>
-                        ))}
+    // ==============================================
+    // 2. 詳細資訊彈窗組件 (Modal)
+    // ==============================================
+    const ProjectModal = ({ project, onClose }) => {
+      if (!project) return null;
+
+      // 點擊背景關閉
+      const handleBackdropClick = (e) => {
+        if (e.target === e.currentTarget) onClose();
+      };
+
+      return (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+          onClick={handleBackdropClick}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-scale-in">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-3">
+                <span className="p-2 bg-white rounded-lg shadow-sm text-blue-600 border border-slate-100">
+                  {project.icon}
+                </span>
+                {project.title}
+              </h2>
+              <button 
+                onClick={onClose} 
+                className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500 shrink-0"
+              >
+                <XIcon size={24} />
+              </button>
+            </div>
+
+            {/* Modal Body (Scrollable) */}
+            <div className="p-6 sm:p-8 overflow-y-auto custom-scroller flex-1">
+              {project.details}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 shrink-0">
+              <button 
+                onClick={onClose}
+                className="px-6 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-200 transition-colors"
+              >
+                關閉
+              </button>
+              <a 
+                href={project.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold transition-colors flex items-center gap-2 shadow-lg shadow-blue-200"
+              >
+                前往使用 <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ==============================================
+    // 3. 主網站組件
+    // ==============================================
+    function PortfolioHub() {
+      const [selectedProject, setSelectedProject] = useState(null);
+
+      // 防止 Modal 開啟時背景捲動
+      useEffect(() => {
+        if (selectedProject) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+      }, [selectedProject]);
+
+      return (
+        <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+          {/* 頂部導覽列 */}
+          <header className="bg-white border-b border-slate-200 sticky top-0 z-40 bg-white/80 backdrop-blur-md">
+            <div className="max-w-5xl mx-auto px-6 h-16 flex justify-between items-center">
+              <div className="flex items-center gap-2 text-xl font-bold text-slate-900 cursor-pointer hover:text-blue-600 transition" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
+                <Briefcase className="w-6 h-6 text-blue-600" />
+                <span>My Portfolio Hub</span>
+              </div>
+              <div className="text-sm font-medium text-slate-500">
+                我的數位收藏
+              </div>
+            </div>
+          </header>
+
+          {/* 主要內容區 */}
+          <main className="max-w-5xl mx-auto px-6 py-12 min-h-[80vh]">
+            <div className="space-y-12 animate-fade-in">
+              {/* 簡介區塊 */}
+              <section className="text-center space-y-4 max-w-2xl mx-auto mt-8">
+                <div className="inline-flex items-center justify-center p-3 bg-blue-50 text-blue-600 rounded-full mb-2 ring-1 ring-blue-100">
+                  <Star className="w-6 h-6 fill-blue-600" />
+                </div>
+                <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+                  精選專案連結
+                </h1>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  這裡彙整了我與 AI 協作開發的各項成果。點擊卡片可查看詳細說明或直接前往使用。
+                </p>
+              </section>
+
+              {/* 專案列表網格 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projectsData.map((project) => (
+                  <div 
+                    key={project.id}
+                    className="group flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="p-6 flex-1 flex flex-col">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-14 h-14 bg-slate-50 text-slate-700 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 shadow-inner">
+                          {project.icon}
+                        </div>
+                      </div>
+                      
+                      <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                        {project.title}
+                      </h3>
+                      <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-1 text-justify line-clamp-3">
+                        {project.description}
+                      </p>
+                      
+                      <div className="flex gap-2 mt-auto">
+                        <button 
+                          onClick={() => setSelectedProject(project)}
+                          className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 hover:text-slate-900 transition-colors text-sm flex items-center justify-center gap-2"
+                        >
+                          <InfoIcon className="w-4 h-4" /> 詳細介紹
+                        </button>
+                        <a 
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 py-2.5 px-4 rounded-xl bg-blue-50 text-blue-600 font-bold hover:bg-blue-600 hover:text-white transition-all text-sm flex items-center justify-center gap-2"
+                        >
+                          前往使用 <ArrowRight className="w-4 h-4" />
+                        </a>
+                      </div>
                     </div>
-                    </div>
+                  </div>
                 ))}
-                <button onClick={() => { const scores = { D: 0, I: 0, S: 0, C: 0 }; Object.values(responses).forEach(v => scores[v] = (scores[v] || 0) + 1); onFinish(scores); }} disabled={!isComplete} className="w-full btn-prominent mt-8 py-4 text-lg">{isLastStep ? "完成測驗" : "下一步"}</button>
-                </div>
-            );
-        }
-
-        function ValuesModule({ onFinish, isLastStep, isCampusMode }) {
-            const [phase, setPhase] = useState(1);
-            const [top3, setTop3] = useState([]);
-            const [idx, setIdx] = useState(0);
-            const [pairChoices, setPairChoices] = useState({});
-
-            if (phase === 1) {
-                const toggle = (id) => { if (top3.includes(id)) setTop3(top3.filter(x => x !== id)); else if (top3.length < 3) setTop3([...top3, id]); };
-                return (
-                <div className="space-y-6 animate-fade-in">
-                    <div className="bg-slate-50 border-l-4 border-slate-600 p-4 text-slate-700 font-bold text-sm">階段一：請閱讀定義，並選出您認為「最重要」的 3 項。</div>
-                    <div className={`grid grid-cols-1 ${isCampusMode ? 'sm:grid-cols-2' : 'md:grid-cols-2'} gap-4`}>
-                    {VALUES_DEFINITIONS.map(d => (
-                        <div key={d.id} onClick={() => toggle(d.id)} className={`p-5 rounded-lg border cursor-pointer transition-all flex justify-between items-start ${isCampusMode && 'active:scale-[0.98]'} ${top3.includes(d.id) ? 'border-slate-800 bg-gray-50 shadow-sm' : 'border-gray-200 hover:bg-gray-50'}`}>
-                        <div><div className={`font-extrabold text-lg ${top3.includes(d.id) ? 'text-slate-900' : 'text-slate-700'}`}>{d.id}</div><div className="text-sm font-bold text-slate-500 mt-1">{d.text}</div></div>
-                        {top3.includes(d.id) && <CheckCircle className="text-slate-800" />}
-                        </div>
-                    ))}
-                    </div>
-                    <button disabled={top3.length !== 3} onClick={() => setPhase(2)} className="w-full btn-prominent mt-4 py-4 text-lg">進入階段二</button>
-                </div>
-                );
-            }
-            const pair = VALUES_PAIRS[idx];
-            const choose = (val) => {
-                const next = { ...pairChoices, [idx]: val }; setPairChoices(next);
-                if (idx < VALUES_PAIRS.length - 1) setTimeout(() => setIdx(idx + 1), 150);
-                else { const tally = {}; Object.values(next).forEach(v => tally[v] = (tally[v] || 0) + 1); onFinish(tally); }
-            };
-            return (
-                <div className="max-w-xl mx-auto text-center space-y-8 py-8 animate-fade-in">
-                <div className="inline-block px-4 py-1 bg-gray-100 rounded-full text-xs font-bold text-slate-500 tracking-wide">題數 {idx + 1} / {VALUES_PAIRS.length}</div>
-                <h3 className="text-2xl font-black text-slate-900">您認為哪一項較符合您的價值觀？</h3>
-                <div className="grid grid-cols-1 gap-6">
-                    <button onClick={() => choose(pair.A)} className={`p-8 border border-gray-200 rounded-lg hover:border-slate-400 hover:bg-gray-50 transition-all text-2xl font-extrabold text-slate-700 hover:text-slate-900 shadow-sm hover:shadow-md ${isCampusMode && 'active:scale-95'}`}>{pair.A}</button>
-                    <div className="text-slate-300 font-extrabold text-sm tracking-widest">OR</div>
-                    <button onClick={() => choose(pair.B)} className={`p-8 border border-gray-200 rounded-lg hover:border-slate-400 hover:bg-gray-50 transition-all text-2xl font-extrabold text-slate-700 hover:text-slate-900 shadow-sm hover:shadow-md ${isCampusMode && 'active:scale-95'}`}>{pair.B}</button>
-                </div>
-                </div>
-            );
-        }
-
-        function OutcomesModule({ onFinish, isLastStep, isCampusMode }) {
-            const [pool, setPool] = useState(OUTCOMES_ITEMS);
-            const [ranked, setRanked] = useState([]);
-            const add = (item) => { setRanked([...ranked, item]); setPool(pool.filter(i => i.id !== item.id)); };
-            const remove = (item) => { setPool([...pool, item].sort((a, b) => parseInt(a.id.substring(1)) - parseInt(b.id.substring(1)))); setRanked(ranked.filter(i => i.id !== item.id)); };
-            const move = (idx, dir) => {
-                if ((dir === -1 && idx === 0) || (dir === 1 && idx === ranked.length - 1)) return;
-                const copy = [...ranked]; const temp = copy[idx]; copy[idx] = copy[idx + dir]; copy[idx + dir] = temp; setRanked(copy);
-            };
-
-            return (
-                <div className="space-y-6 animate-fade-in flex flex-col h-full">
-                <div className="bg-slate-50 border-l-4 border-slate-600 p-4 text-slate-700 font-bold text-sm">請將左側項目點擊加入右側，並透過箭頭調整排序（越上方越重要）。需完成所有排序。</div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 relative z-10">
-                    <div className={`bg-gray-50 rounded-lg ${isCampusMode ? 'p-3 sm:p-4' : 'p-4'} flex flex-col h-[45vh] min-h-[350px] max-h-[500px] border border-gray-200 shadow-inner`}>
-                    <div className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-3">待選項目 ({pool.length})</div>
-                    <div className="overflow-y-auto flex-1 space-y-3 pr-2 custom-scroller">
-                        {pool.map(item => (
-                        <div key={item.id} onClick={() => add(item)} className={`bg-white p-4 rounded-md shadow-sm border border-gray-200 cursor-pointer hover:border-emerald-400 hover:shadow-md transition-all group ${isCampusMode && 'active:scale-[0.98]'}`}>
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-base font-extrabold text-slate-800 group-hover:text-emerald-700">{item.term}</span>
-                                <Plus size={isCampusMode ? 24 : 20} className={`text-slate-300 group-hover:text-emerald-500 ${isCampusMode && 'bg-slate-50 rounded-full p-1'}`}/>
-                            </div>
-                            <p className="text-xs font-bold text-slate-600 leading-relaxed mb-3">{item.desc}</p>
-                            {/* 思考問題區塊 */}
-                            {item.questions && item.questions.length > 0 && (
-                                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                                    <div className="text-[11px] font-black text-slate-500 mb-1">思考問題：</div>
-                                    <ul className="space-y-1">
-                                        {item.questions.map((q, qIdx) => (
-                                            <li key={qIdx} className="text-[11px] font-bold text-slate-600 leading-tight">{q}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-                        ))}
-                    </div>
-                    </div>
-                    
-                    <div className={`bg-white rounded-lg ${isCampusMode ? 'p-3 sm:p-4' : 'p-4'} flex flex-col h-[45vh] min-h-[350px] max-h-[500px] border-2 border-slate-100 shadow-lg`}>
-                    <div className="text-xs font-bold text-slate-500 uppercase tracking-widest text-center mb-3">您的排序 (Top 1 最重要)</div>
-                    <div className="overflow-y-auto flex-1 space-y-2 pr-2 custom-scroller">
-                        {ranked.map((item, i) => (
-                        <div key={item.id} className={`bg-slate-50 ${isCampusMode ? 'p-3 sm:p-4' : 'p-3'} rounded-md border border-slate-200 flex items-center gap-3 animate-fade-in`}>
-                            <div className={`w-8 h-8 rounded flex items-center justify-center font-black text-sm shrink-0 ${i < 3 ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-gray-200'}`}>{i + 1}</div>
-                            <div className="flex-1"><span className={`text-sm font-extrabold text-slate-800 block`}>{item.term}</span></div>
-                            <div className={`flex ${isCampusMode ? 'gap-2' : 'gap-1'} shrink-0`}>
-                                <button onClick={() => move(i, -1)} className={isCampusMode ? 'p-2 sm:p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-slate-500 active:scale-95' : 'p-1 hover:bg-white rounded text-slate-400 hover:text-slate-800'}><ChevronUp size={isCampusMode ? 20 : 18}/></button>
-                                <button onClick={() => move(i, 1)} className={isCampusMode ? 'p-2 sm:p-3 bg-white border border-gray-200 shadow-sm rounded-lg text-slate-500 active:scale-95' : 'p-1 hover:bg-white rounded text-slate-400 hover:text-slate-800'}><ChevronDown size={isCampusMode ? 20 : 18}/></button>
-                                <button onClick={() => remove(item)} className={isCampusMode ? 'p-2 sm:p-3 bg-red-50 border border-red-100 shadow-sm rounded-lg text-red-400 active:scale-95 ml-1' : 'p-1 hover:bg-red-50 rounded text-slate-300 hover:text-red-500 ml-1'}><X size={isCampusMode ? 20 : 18}/></button>
-                            </div>
-                        </div>
-                        ))}
-                    </div>
-                    </div>
-                </div>
-                
-                <div className="pt-4 relative z-20">
-                    <button disabled={pool.length > 0} onClick={() => onFinish(ranked)} className="w-full btn-prominent py-4 text-lg shadow-lg">{isLastStep ? "完成測驗" : "下一步"}</button>
-                </div>
-                </div>
-            );
-        }
-
-        function TraitsModule({ onFinish, isLastStep, isCampusMode }) {
-            const [checked, setChecked] = useState([]);
-            const toggle = (t) => { if (checked.includes(t)) setChecked(checked.filter(x => x !== t)); else setChecked([...checked, t]); };
-            return (
-                <div className="space-y-8 animate-fade-in">
-                <div className="bg-slate-50 border-l-4 border-slate-600 p-4 text-slate-700 font-bold text-sm">請勾選您認為您具備的特質。</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {TRAITS_LIST.map(t => (
-                    <label key={t} className={`flex items-center gap-3 ${isCampusMode ? 'p-5 active:scale-[0.98]' : 'p-4'} rounded-lg border cursor-pointer transition-all select-none ${checked.includes(t) ? 'border-slate-800 bg-gray-50 shadow-sm' : 'border-gray-200 hover:border-slate-300 bg-white'}`}>
-                        <input type="checkbox" className="hidden" checked={checked.includes(t)} onChange={() => toggle(t)} />
-                        <div className={`rounded border flex items-center justify-center transition-colors ${isCampusMode ? 'w-6 h-6' : 'w-5 h-5'} ${checked.includes(t) ? 'bg-slate-800 border-slate-800' : 'bg-white border-gray-300'}`}>{checked.includes(t) && <CheckCircle size={isCampusMode ? 16 : 14} className="text-white" />}</div>
-                        <span className={`font-extrabold ${isCampusMode ? 'text-base' : 'text-sm'} ${checked.includes(t) ? 'text-slate-900' : 'text-slate-600'}`}>{t}</span>
-                    </label>
-                    ))}
-                </div>
-                <button onClick={() => onFinish(checked)} className="w-full btn-prominent mt-6 py-4 text-lg">{isLastStep ? "完成所有測驗" : "下一步"}</button>
-                </div>
-            );
-        }
-
-        function EnneagramModule({ onFinish, isLastStep, isCampusMode }) {
-            const [selections, setSelections] = useState({});
-            const isComplete = ENNEAGRAM_QUESTIONS.every(q => selections[q.id] !== undefined);
-            return (
-                <div className="space-y-8 animate-fade-in">
-                <div className="bg-slate-50 border-l-4 border-slate-600 p-4 text-slate-700 font-bold text-sm">請勾選「是」如果該描述非常符合您，否則勾選「否」。</div>
-                <div className="grid grid-cols-1 gap-4">
-                    {ENNEAGRAM_QUESTIONS.map((q) => (
-                    <div key={q.id} className={`${isCampusMode ? 'p-5' : 'p-3 sm:p-4'} bg-white border border-gray-200 rounded-lg flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-slate-300 transition-colors`}>
-                        <span className={`font-extrabold text-slate-700 flex-1 ${isCampusMode ? 'text-base leading-relaxed' : 'text-sm leading-relaxed'}`}>{q.text}</span>
-                        <div className="flex gap-2 sm:gap-3 shrink-0">
-                        <button onClick={() => setSelections({...selections, [q.id]: 1})} className={`flex-1 sm:flex-none ${isCampusMode ? 'px-8 py-3 rounded-lg active:scale-95' : 'px-4 py-2 rounded-md'} font-black border transition-colors ${selections[q.id] === 1 ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-400 border-gray-200 hover:bg-gray-50'}`}>是</button>
-                        <button onClick={() => setSelections({...selections, [q.id]: 0})} className={`flex-1 sm:flex-none ${isCampusMode ? 'px-8 py-3 rounded-lg active:scale-95' : 'px-4 py-2 rounded-md'} font-black border transition-colors ${selections[q.id] === 0 ? 'bg-slate-600 text-white border-slate-600' : 'bg-white text-slate-400 border-gray-200 hover:bg-gray-50'}`}>否</button>
-                        </div>
-                    </div>
-                    ))}
-                </div>
-                <button onClick={() => {
-                    const scores = {}; ENNEAGRAM_QUESTIONS.forEach(q => { if(selections[q.id] === 1) scores[q.type] = (scores[q.type] || 0) + 1; }); onFinish(scores);
-                }} disabled={!isComplete} className="w-full btn-prominent mt-6 py-4 text-lg">{isLastStep ? "完成測驗" : "下一步"}</button>
-                </div>
-            );
-        }
-
-        function BigFiveModule({ onFinish, isLastStep, isCampusMode }) {
-            const [ratings, setRatings] = useState({});
-            const isComplete = BIG5_QUESTIONS.every(q => ratings[q.id]);
-            return (
-                <div className="space-y-8 animate-fade-in">
-                <div className="bg-slate-50 border-l-4 border-slate-600 p-4 text-slate-700 font-bold text-sm">請評分以下描述符合您的程度 (1:非常不同意 - 5:非常同意)。</div>
-                {BIG5_QUESTIONS.map((q) => (
-                    <div key={q.id} className={isCampusMode ? 'space-y-3 bg-white p-5 rounded-lg border border-gray-200' : 'space-y-2'}>
-                    <div className={`font-extrabold text-slate-700 ${isCampusMode ? 'text-base' : 'text-sm'}`}>{q.text}</div>
-                    <div className={`flex justify-between gap-2 ${isCampusMode ? 'sm:gap-4' : ''}`}>
-                        {[1,2,3,4,5].map(v => (
-                        <button key={v} onClick={() => setRatings({...ratings, [q.id]: v})} className={`flex-1 ${isCampusMode ? 'py-4 sm:py-5 rounded-lg text-lg active:scale-95' : 'py-2 rounded-md text-sm'} font-black border transition-all ${ratings[q.id] === v ? 'bg-slate-800 text-white border-slate-800 shadow-md' : 'bg-white text-slate-400 border-gray-200 hover:bg-gray-50'}`}>{v}</button>
-                        ))}
-                    </div>
-                    </div>
-                ))}
-                <button onClick={() => {
-                    const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-                    BIG5_QUESTIONS.forEach(q => { const raw = ratings[q.id]; const val = q.rev ? (6 - raw) : raw; scores[q.dim] = (scores[q.dim] || 0) + val; });
-                    onFinish(scores);
-                }} disabled={!isComplete} className="w-full btn-prominent mt-6 py-4 text-lg">{isLastStep ? "完成測驗" : "下一步"}</button>
-                </div>
-            );
-        }
-
-        function HollandModule({ onFinish, isLastStep, isCampusMode }) {
-            const [selected, setSelected] = useState([]);
-            const toggle = (i) => { if(selected.includes(i)) setSelected(selected.filter(x=>x!==i)); else setSelected([...selected, i]); };
-            return (
-                <div className="space-y-8 animate-fade-in">
-                <div className="bg-slate-50 border-l-4 border-slate-600 p-4 text-slate-700 font-bold text-sm">請勾選您感興趣或喜歡的活動 (可多選)。</div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {HOLLAND_ACTIVITIES.map((act, i) => (
-                    <div key={i} onClick={() => toggle(i)} className={`${isCampusMode ? 'p-5 active:scale-[0.98]' : 'p-4'} border rounded-lg cursor-pointer flex items-center justify-between transition-colors ${selected.includes(i) ? 'border-slate-800 bg-gray-50' : 'border-gray-200 hover:bg-gray-50 bg-white'}`}>
-                        <span className={`font-extrabold ${isCampusMode ? 'text-base' : 'text-sm'} ${selected.includes(i) ? 'text-slate-900' : 'text-slate-600'}`}>{act.text}</span>
-                        {selected.includes(i) && <CheckCircle className="text-slate-800" size={isCampusMode ? 20 : 18}/>}
-                    </div>
-                    ))}
-                </div>
-                <button onClick={() => {
-                    const scores = { R:0, I:0, A:0, S:0, E:0, C:0 }; selected.forEach(i => { const type = HOLLAND_ACTIVITIES[i].type; scores[type]++; }); onFinish(scores);
-                }} className="w-full btn-prominent mt-6 py-4 text-lg">{isLastStep ? "完成測驗" : "下一步"}</button>
-                </div>
-            );
-        }
-
-        function QuizConfigurator({ showToast, onGenerate }) {
-            const [modules, setModules] = useState({ disc: true, values: true, outcomes: true, traits: true, enneagram: true, big5: true, holland: true });
-            const [code, setCode] = useState('');
-
-            const generate = () => {
-                const active = Object.keys(modules).filter(k => modules[k]);
-                if (active.length === 0) { showToast("請至少選擇一個模組", "error"); return; }
-                const payload = { modules: active, timestamp: Date.now() };
-                const str = safeEncode(payload); setCode(str);
-                handleCopyText(str, () => showToast("已複製到剪貼簿", "success"));
-                onGenerate(str);
-            };
-
-            return (
-                <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200 animate-fade-in max-w-2xl mx-auto">
-                <h2 className="text-2xl font-black mb-6 flex items-center gap-2 text-slate-800"><Settings className="text-slate-700"/> 建立測驗配置 (遠端標準版)</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    {[{ id: 'disc', label: 'DISC 性格測驗', sub: '10題完整版' }, { id: 'values', label: '工作價值觀', sub: '7項定義 + 21題二選一' }, { id: 'outcomes', label: 'Outcomes 驅動力', sub: '12項價值排序' }, { id: 'traits', label: '成功特質檢核', sub: '35項特質掃描' }, { id: 'enneagram', label: '九型人格', sub: '18題快速版' }, { id: 'big5', label: '大五人格', sub: 'TIPI 10題版' }, { id: 'holland', label: '職業興趣 RIASEC', sub: '30項興趣檢核' }].map(m => (
-                    <div key={m.id} onClick={() => setModules({...modules, [m.id]: !modules[m.id]})} className={`p-3 border rounded-lg cursor-pointer transition-all flex justify-between items-center ${modules[m.id] ? 'border-slate-800 bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                        <div><div className={`font-extrabold text-sm ${modules[m.id] ? 'text-slate-900' : 'text-slate-500'}`}>{m.label}</div><div className="text-[11px] font-bold text-slate-400">{m.sub}</div></div>
-                        {modules[m.id] && <CheckCircle size={18} className="text-slate-800" />}
-                    </div>
-                    ))}
-                </div>
-                <button onClick={generate} className="w-full btn-prominent py-3 text-base">產生 Config Code</button>
-                {code && (
-                    <div className="mt-6 bg-gray-50 p-4 rounded-md border border-gray-200 animate-fade-in">
-                    <label className="text-xs font-black text-slate-500 mb-2 block uppercase tracking-wide">Config Code</label>
-                    <div className="flex gap-2">
-                        <input readOnly value={code} className="flex-1 bg-white border border-gray-300 rounded-md p-2 text-sm font-mono text-slate-600 font-bold" />
-                        <button onClick={() => handleCopyText(code, () => showToast("已複製", "success"))} className="p-2 bg-white border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"><Copy size={16} /></button>
-                    </div>
-                    </div>
-                )}
-                </div>
-            );
-        }
-
-        function QuizRunner({ config, candidateInfo, onComplete, onProgress, isCampusMode }) {
-            const [step, setStep] = useState(0);
-            const [currentAnswers, setCurrentAnswers] = useState({});
-            const moduleKey = config.modules[step];
-            const isLastStep = step === config.modules.length - 1;
-
-            const handleModuleFinish = (data) => {
-                const nextAnswers = { ...currentAnswers, [moduleKey]: data };
-                setCurrentAnswers(nextAnswers);
-                if(onProgress) onProgress(nextAnswers);
-                if (!isLastStep) { setStep(prev => prev + 1); window.scrollTo(0, 0); } 
-                else { onComplete(nextAnswers); }
-            };
-
-            const Wrapper = isCampusMode ? 'div' : 'div';
-            const wrapperClass = isCampusMode ? 'bg-white p-5 sm:p-8 rounded-xl shadow-md border border-gray-200 animate-fade-in max-w-3xl mx-auto relative' : 'bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200 animate-fade-in max-w-3xl mx-auto';
-
-            return (
-                <Wrapper className={wrapperClass}>
-                <div className="mb-6 pb-4 border-b border-gray-100 flex justify-between items-end">
-                    <div>
-                    <span className="text-slate-600 font-black bg-gray-100 px-3 py-1 rounded-full text-[11px] tracking-wider">STEP {step + 1} / {config.modules.length}</span>
-                    <h2 className="text-2xl font-black text-slate-900 mt-3 uppercase tracking-tight">{moduleKey}</h2>
-                    </div>
-                    <div className="text-right text-[11px] font-bold text-slate-400">受測者：{candidateInfo.name}</div>
-                </div>
-                {moduleKey === 'disc' && <DiscModule onFinish={handleModuleFinish} isLastStep={isLastStep} isCampusMode={isCampusMode} />}
-                {moduleKey === 'values' && <ValuesModule onFinish={handleModuleFinish} isLastStep={isLastStep} isCampusMode={isCampusMode} />}
-                {moduleKey === 'outcomes' && <OutcomesModule onFinish={handleModuleFinish} isLastStep={isLastStep} isCampusMode={isCampusMode} />}
-                {moduleKey === 'traits' && <TraitsModule onFinish={handleModuleFinish} isLastStep={isLastStep} isCampusMode={isCampusMode} />}
-                {moduleKey === 'enneagram' && <EnneagramModule onFinish={handleModuleFinish} isLastStep={isLastStep} isCampusMode={isCampusMode} />}
-                {moduleKey === 'big5' && <BigFiveModule onFinish={handleModuleFinish} isLastStep={isLastStep} isCampusMode={isCampusMode} />}
-                {moduleKey === 'holland' && <HollandModule onFinish={handleModuleFinish} isLastStep={isLastStep} isCampusMode={isCampusMode} />}
-                </Wrapper>
-            );
-        }
-
-        const renderMarkdown = (text) => {
-            if (!text) return <span className="text-slate-400 italic font-bold">（尚未輸入分析報告）</span>;
-            
-            const formatInline = (str) => {
-                const parts = str.split(/(\*\*.*?\*\*)/g);
-                return parts.map((part, i) => {
-                    if (part.startsWith('**') && part.endsWith('**')) {
-                        return <strong key={i} className="font-black text-indigo-900 bg-indigo-50 px-1 mx-0.5 rounded border border-indigo-100">{part.slice(2, -2)}</strong>;
-                    }
-                    return part;
-                });
-            };
-
-            const lines = text.split('\n');
-            return lines.map((line, index) => {
-                const tLine = line.trim();
-                if (tLine.startsWith('### ')) return <h3 key={index} className="text-base font-black text-slate-800 mt-4 mb-1">{formatInline(tLine.substring(4))}</h3>;
-                if (tLine.startsWith('## ')) return <h2 key={index} className="text-lg font-black text-slate-800 mt-5 mb-2">{formatInline(tLine.substring(3))}</h2>;
-                if (tLine.startsWith('# ')) return <h1 key={index} className="text-2xl font-black text-slate-900 mt-8 mb-4 border-b border-gray-200 pb-2">{formatInline(tLine.substring(2))}</h1>;
-                if (tLine.startsWith('- ')) return <div key={index} className="flex items-start gap-2 ml-4 mt-1.5 mb-1.5"><span className="text-slate-400 mt-0.5 font-black">•</span><span className="flex-1 font-bold text-slate-700 text-sm">{formatInline(tLine.substring(2))}</span></div>;
-                if (tLine.match(/^\d+\.\s/)) return <div key={index} className="mt-4 mb-1.5 font-black text-slate-800 text-sm leading-relaxed">{formatInline(tLine)}</div>;
-                if (tLine === '') return <div key={index} className="h-2"></div>;
-                return <p key={index} className="mb-1.5 leading-relaxed text-slate-700 font-bold text-sm">{formatInline(line)}</p>;
-            });
-        };
-
-        function ResultDashboard({ answers, config, candidateInfo, showToast, isCampusMode, duration }) {
-            const [aiReportContent, setAiReportContent] = useState('');
-            const [isEditingReport, setIsEditingReport] = useState(true);
-
-            const formatDuration = (secs) => {
-                if (secs === null || secs === undefined) return '未記錄';
-                const m = Math.floor(secs / 60); const s = secs % 60; return `${m}分 ${s}秒`;
-            };
-
-            const reliabilityResults = useMemo(() => {
-                if (!isCampusMode) return null;
-                const reasons = []; let score = 100;
-                const moduleCount = config.modules.length;
-                if (duration < moduleCount * 10) { score -= 40; reasons.push(`⚡ 作答速度極快 (平均單模組不到10秒)，疑似未經思考亂填。`); } 
-                else if (duration < moduleCount * 25) { score -= 15; reasons.push(`🏃 作答速度較快，請留意是否有快速掃視而未詳讀題目的情況。`); }
-
-                if (answers.big5) {
-                    const vals = Object.values(answers.big5);
-                    if (vals.every(v => v >= 12)) { score -= 20; reasons.push(`🌟 大五人格所有指標皆極高，可能有「社會期許誤差」，刻意表現出完美形象。`); }
-                }
-                if (answers.traits && answers.disc) {
-                    const traitsCount = answers.traits.length;
-                    if (traitsCount > 30) { score -= 10; reasons.push(`✅ 勾選特質過多 (${traitsCount}/35)，受測者可能對自我認知較模糊或過於自信。`); } 
-                    else if (traitsCount < 5) { score -= 10; reasons.push(`❌ 勾選特質過少 (${traitsCount}/35)，受測者可能防備心較重或缺乏自信。`); }
-                    if (answers.traits.includes("我有條理") && (answers.disc.C || 0) < 1) { score -= 5; reasons.push(`⚠️ 矛盾點：自認「有條理」但行為風格中「C」得分極低。`); }
-                    if (answers.traits.includes("我會採取主動") && (answers.disc.D || 0) < 1) { score -= 5; reasons.push(`⚠️ 矛盾點：自認「採取主動」但行為風格中「D」得分極低。`); }
-                }
-                let status = "高"; let color = "text-emerald-700 bg-emerald-50 border-emerald-200";
-                if (score < 60) { status = "低 (不具參考價值)"; color = "text-rose-700 bg-rose-50 border-rose-200"; } 
-                else if (score < 85) { status = "中 (需面試複核)"; color = "text-amber-700 bg-amber-50 border-amber-200"; }
-                return { score, status, color, reasons };
-            }, [answers, duration, config, isCampusMode]);
-
-            const candidateDataStr = `
-1. DISC: ${JSON.stringify(answers.disc || {})}
-2. 工作價值觀: ${JSON.stringify(answers.values || {})}
-3. 驅動力 (Outcomes): ${answers.outcomes ? answers.outcomes.map((x)=>x.term).join(', ') : 'N/A'}
-4. 特質檢核 (Traits): ${answers.traits?.join(', ')}
-5. 九型人格: ${JSON.stringify(answers.enneagram || {})}
-6. 大五人格: ${JSON.stringify(answers.big5 || {})}
-7. Holland: ${JSON.stringify(answers.holland || {})}
-`.trim();
-
-            const mandatoryOutputFormat = `## 輸出格式 (Markdown)\n⚠️ 非常重要：請務必將您產出的「整份最終報告內容」完全包裝在一個純文字程式碼區塊中 (也就是在開頭加上 \`\`\`text ，在結尾加上 \`\`\`)。請依照以下結構輸出：`;
-
-            const getSummaryPrompt = () => `
-# 性格與潛能簡介報告 (給受測者的破冰回饋)
-角色: 專業心理測評師。
-任務: 根據以下數據，為 ${candidateInfo.name} 寫一段約 300 字的「性格亮點簡介」。
-目的: 讓受測者覺得「很準、被理解」，並產生想要了解更多的信任感。不需給出具體職業建議，只要點出他最突出的 2-3 個特質優勢即可。語氣要專業、溫暖、肯定。
-請「完全且僅能」基於下方的測驗數據分析，不受過往對話影響。
-## 測驗數據
-${candidateDataStr}
-${mandatoryOutputFormat}
-`.trim();
-
-            const getCandidatePrompt = () => `
-# 個人職涯探索與天賦分析報告
-角色: 你的專屬生涯教練與心理諮商師。任務: 協助 ${candidateInfo.name} 深度認識自己，探索職涯。
-請「完全且僅能」基於下方的測驗數據分析，不受過往對話影響。
-## 你的測驗數據
-${candidateDataStr}
-${mandatoryOutputFormat}
-1. **[深層自我察覺]**: 綜合分析性格 DNA，隱藏天賦。
-2. **[職場定位]**: 適合的「工作型態」與「文化氛圍」。
-3. **[職涯方向建議]**: 
-   - 請務必列出 **5 到 7 個**最適合的具體職業或領域。
-   - **推薦原因分析**：針對每一個職業，請「具體說明」是基於哪些測驗數據得出的結論（例如：「因為 DISC 的 D 型偏高，且 Outcomes 看重『獨立』與『金錢』，所以推薦此職業...」），請務必將客觀數據指標與職業特性做深度連結。
-4. **[成長備忘錄]**: 心理障礙克服與原子習慣建議。
-`.trim();
-
-            const getCampusAgentPrompt = () => `
-# 專業保險業務潛能評估報告 (校園版)
-角色: 頂尖保險業主管。任務: 分析 ${candidateInfo.name} 的潛力。
-請「完全且僅能」基於下方測驗數據分析。
-## 數據
-- 系統預判可信度: ${reliabilityResults?.status}
-${candidateDataStr}
-${mandatoryOutputFormat}
-1. **[銷售潛力總結]**: 定義其風格。
-2. **[保險業適配度]**: 面對拒絕的挫折力與經營耐心。
-3. **[MDRT 潛質]**: 評估抗壓、連結力、自律。
-4. **[致命傷與激勵因子]**: 陣亡原因與激勵誘因。
-5. **[增員成交戰術]**: 打動他的願景與預判拒絕的化解話術。
-`.trim();
-
-            const getReliabilityPrompt = () => `
-# 測驗信效度與作答真實性分析
-角色: 行為分析專家。評估 ${candidateInfo.name} 的真實作答情況。
-請「完全且僅能」基於測驗數據。
-## 數據
-- 作答時間: ${formatDuration(duration)}
-${candidateDataStr}
-${mandatoryOutputFormat}
-1. **[作答可信度總評]**: (高/中/低)及理由。
-2. **[數據一致性偵測]**: 邏輯衝突點。
-3. **[面試驗證建議]**: 1-2 個尖銳的面試提問。
-`.trim();
-
-            const getStandardAgentPrompt = () => `
-# 專業保險業務潛能評估報告
-角色: 保經處經理與組織心理學家。任務: 分析 ${candidateInfo.name} 成為 MDRT (百萬圓桌) 保險業務員的潛力。
-## 數據
-${candidateDataStr}
-${mandatoryOutputFormat}
-1. **[銷售潛力]**: 風格定義。
-2. **[保經 vs 保險員]**: 單一公司或保經適配。
-3. **[MDRT 潛質]**: 抗壓與自律。
-4. **[留任風險與激勵]**: 誘因。
-5. **[黃金 90 天策略]**: 輔導重點。
-6. **[Closing 戰術]**: 話術。
-`.trim();
-
-            const getSalesAssistantPrompt = () => `
-# 業務助理適配性評估
-角色: HR 專家。評估 ${candidateInfo.name} 是否適合高壓業務助理。
-## 數據
-${candidateDataStr}
-${mandatoryOutputFormat}
-1. **[行政細心與穩定]**: 耐心與精確度。
-2. **[業務支援]**: 安撫客戶、溝通能力。
-3. **[管理適配]**: 哪種主管適合帶他。
-4. **[潛在風險]**: 抗壓與厭倦度。
-`.trim();
-
-            const getAssistantToAgentPrompt = () => `
-# 助理轉型保險業務 - 潛能引導
-角色: 王牌通訊處經理。任務: 挖掘 ${candidateInfo.name} 的隱藏業務天賦並設計說服話術。
-## 數據
-${candidateDataStr}
-${mandatoryOutputFormat}
-1. **[被埋沒的業務天賦]**: 性格亮點。
-2. **[為何不該只做助理]**: 發展限制。
-3. **[推坑轉型劇本]**: 開場、安撫恐懼、願景描繪。
-`.trim();
-
-            const hollandData = answers.holland ? [
-                { label: 'R', value: answers.holland.R || 0, max: 5 }, { label: 'I', value: answers.holland.I || 0, max: 5 },
-                { label: 'A', value: answers.holland.A || 0, max: 5 }, { label: 'S', value: answers.holland.S || 0, max: 5 },
-                { label: 'E', value: answers.holland.E || 0, max: 5 }, { label: 'C', value: answers.holland.C || 0, max: 5 },
-            ] : [];
-
-            const handlePrintClick = () => {
-                if (isEditingReport) setIsEditingReport(false);
-                setTimeout(() => {
-                    handleSafePrint(showToast, candidateInfo.name);
-                }, 100);
-            };
-
-            const handleExportPDF = () => {
-                if (typeof window.html2pdf === 'undefined') {
-                    showToast("PDF 模組載入中，請稍後再試", "error");
-                    return;
-                }
-                if (isEditingReport) setIsEditingReport(false);
-                showToast("正在生成 PDF，請稍候...", "info");
-
-                setTimeout(async () => {
-                    const element = document.getElementById('report-container');
-                    element.classList.add('pdf-export-mode');
-
-                    const opt = {
-                        margin:       [0.4, 0], 
-                        filename:     `性格分析報告_${candidateInfo.name}.pdf`,
-                        image:        { type: 'jpeg', quality: 0.98 },
-                        html2canvas:  { scale: 2, useCORS: true, windowWidth: 1024 }, 
-                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['css', 'legacy'] } 
-                    };
-
-                    try {
-                        const pdfBlob = await window.html2pdf().set(opt).from(element).outputPdf('blob');
-                        element.classList.remove('pdf-export-mode');
-
-                        const file = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
-                        
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ title: opt.filename, text: '請查閱性格分析報告', files: [file] });
-                            showToast("分享畫面已開啟", "success");
-                        } else {
-                            const url = URL.createObjectURL(file);
-                            const a = document.createElement('a');
-                            a.href = url; a.download = opt.filename; a.click(); URL.revokeObjectURL(url);
-                            showToast("已下載 PDF", "success");
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        element.classList.remove('pdf-export-mode');
-                        showToast("輸出 PDF 失敗", "error");
-                    }
-                }, 300);
-            };
-
-            return (
-                <div className={`pb-40 ${isCampusMode ? 'md:pb-32' : 'pb-40'} animate-fade-in`}>
-                <div id="report-container" className={`bg-white ${isCampusMode ? 'p-4 sm:p-5 md:p-8 rounded-xl' : 'p-4 sm:p-5 md:p-8 rounded-xl'} shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200 max-w-4xl mx-auto space-y-5 md:space-y-6`}>
-                    
-                    {/* Header */}
-                    <div className="flex justify-between items-end border-b-4 border-slate-900 pb-4">
-                        <div>
-                            <h1 className={`${isCampusMode ? 'text-xl sm:text-2xl' : 'text-2xl'} font-black text-slate-900 tracking-tight`}>性格分析報告</h1>
-                            <p className="text-slate-500 font-extrabold text-[11px] sm:text-xs mt-1">Personality Analysis Report</p>
-                        </div>
-                        <div className="text-right text-sm text-slate-600">
-                            <div className="text-xl font-black text-slate-900 mb-1">{candidateInfo.name}</div>
-                            <div className={`flex ${isCampusMode ? 'flex-col sm:flex-row sm:items-center mt-1.5 font-bold' : 'items-center gap-2'} justify-end text-[11px] text-slate-500`}>
-                                <div className="flex items-center justify-end gap-1 bg-slate-100 px-2 py-0.5 rounded-md"><Calendar size={12}/> {candidateInfo.dob}</div>
-                                {isCampusMode && <div className="flex items-center justify-end gap-1 sm:ml-2 bg-slate-100 px-2 py-0.5 rounded-md"><Clock size={12}/> 作答時間: {formatDuration(duration)}</div>}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 主要報告內容區塊 (全面緊湊化) */}
-                    <div className="space-y-5 md:space-y-6">
-                        {answers.disc && (
-                        <section className="card break-inside-avoid">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-blue-800 pl-2.5 mb-3 bg-blue-50 py-1 rounded-r-md">1. DISC 風格</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {['D','I','S','C'].map(type => (
-                                <div key={type} className="flex flex-col h-full bg-gray-50 rounded-xl border-2 border-gray-200 overflow-hidden shadow-sm">
-                                <div className="p-2.5 text-center border-b border-gray-200 bg-white">
-                                    <div className="text-3xl font-black text-slate-800 mb-0.5">{answers.disc[type] || 0}</div>
-                                    <div className="font-extrabold text-blue-800 text-sm">{type} {DISC_ANIMALS[type].animal}</div>
-                                    <div className="text-[10px] text-slate-500 mt-0.5 font-bold">{DISC_ANIMALS[type].type}</div>
-                                </div>
-                                <div className="p-2.5 text-[11px] text-slate-700 bg-gray-50 flex-1 flex flex-col justify-center text-center">
-                                    <p className="font-extrabold mb-1 text-slate-800">{DISC_ANIMALS[type].traits}</p>
-                                    <p className={`opacity-80 leading-snug font-bold ${isCampusMode ? 'hidden sm:block' : ''}`}>{DISC_ANIMALS[type].desc}</p>
-                                </div>
-                                </div>
-                            ))}
-                            </div>
-                        </section>
-                        )}
-
-                        {answers.enneagram && (
-                        <section className="card break-inside-avoid">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-rose-800 pl-2.5 mb-3 bg-rose-50 py-1 rounded-r-md">2. 九型人格 (Top 3)</h3>
-                            <div className={`grid grid-cols-3 gap-2 sm:gap-3`}>
-                            {Object.entries(answers.enneagram).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([type, score]) => (
-                                <div key={type} className="bg-white p-3 rounded-lg border-2 border-rose-100 flex flex-col justify-between items-start shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-rose-400"></div>
-                                <div className="pl-1">
-                                    <div className="font-black text-rose-900 text-sm mb-0.5">{ENNEAGRAM_TYPES[type].name}</div>
-                                    <div className="text-[10px] text-rose-700 font-extrabold leading-tight">{ENNEAGRAM_TYPES[type].desc}</div>
-                                </div>
-                                <div className="text-[11px] font-black text-rose-900 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 mt-2">得分: {score}</div>
-                                </div>
-                            ))}
-                            </div>
-                        </section>
-                        )}
-
-                        {answers.big5 && (
-                        <section className="card break-inside-avoid">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-sky-800 pl-2.5 mb-3 bg-sky-50 py-1 rounded-r-md">3. 大五人格 (OCEAN)</h3>
-                            <div className="space-y-2 bg-white p-4 rounded-xl border-2 border-slate-100 shadow-sm">
-                            {Object.entries(answers.big5).map(([dim, score]) => (
-                                <div key={dim} className="flex items-center gap-3">
-                                <div className="w-14 font-black text-slate-700 text-right text-[11px] sm:text-xs">{BIG5_LABELS[dim].name.split(' ')[0]}</div>
-                                <div className="flex-1 bg-slate-100 rounded-full h-3 border border-slate-200 overflow-hidden relative group">
-                                    <div className="bg-sky-600 transition-all duration-1000 rounded-full h-full" style={{width: `${(score/14)*100}%`}}></div>
-                                </div>
-                                <div className="w-6 text-sm font-black text-slate-800 text-center bg-slate-50 border border-slate-200 rounded">{score}</div>
-                                </div>
-                            ))}
-                            </div>
-                        </section>
-                        )}
-
-                        {answers.holland && (
-                        <section className="card break-inside-avoid">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-orange-800 pl-2.5 mb-3 bg-orange-50 py-1 rounded-r-md">4. Holland 職業興趣</h3>
-                            <div className="flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-xl border-2 border-orange-100 shadow-sm">
-                            <div className="flex-1 flex justify-center"><RadarChart data={hollandData} size={180} color="#ea580c" /></div>
-                            <div className="flex-1 w-full">
-                                <div className="grid grid-cols-3 gap-2 mb-3">
-                                {Object.entries(answers.holland).sort((a,b)=>b[1]-a[1]).map(([type, score]) => (
-                                    <div key={type} className="bg-white rounded-lg text-center border-2 border-orange-100 p-2 shadow-sm">
-                                    <div className="font-extrabold text-orange-900 text-[11px] mb-0.5">{HOLLAND_LABELS[type].name.split(' ')[0]}</div>
-                                    <div className="text-xl font-black text-orange-700">{score}</div>
-                                    </div>
-                                ))}
-                                </div>
-                                <div className="text-xs text-slate-700 font-extrabold bg-orange-50 rounded-lg border border-orange-200 text-center p-2.5 shadow-sm">
-                                您的 Holland 代碼: <span className="text-xl tracking-widest text-orange-700 ml-2 font-black">{Object.entries(answers.holland).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]).join('')}</span>
-                                </div>
-                            </div>
-                            </div>
-                        </section>
-                        )}
-
-                        {answers.values && (
-                        <section className="card break-inside-avoid">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-indigo-800 pl-2.5 mb-3 bg-indigo-50 py-1 rounded-r-md">5. 工作價值觀 (完整排序)</h3>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {Object.entries(answers.values).sort((a,b)=>b[1]-a[1]).map(([k,v], i) => (
-                                <div key={k} className={`flex items-center justify-between px-3 py-2 rounded-lg border-2 ${i < 3 ? 'bg-indigo-50 border-indigo-200 text-indigo-900 font-black shadow-sm' : 'bg-white border-slate-100 text-slate-700 font-bold'}`}>
-                                <div className="flex items-center gap-2">
-                                    <div className={`flex items-center justify-center text-xs font-black w-5 h-5 rounded ${i < 3 ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-200 text-slate-600'}`}>{i + 1}</div>
-                                    <span className="text-sm">{k}</span>
-                                </div>
-                                <span className={`text-[10px] font-bold ${i < 3 ? 'opacity-80' : 'opacity-50'}`}>分數: {v}</span>
-                                </div>
-                            ))}
-                            </div>
-                        </section>
-                        )}
-
-                        {answers.outcomes && (
-                        <section className="card">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-emerald-800 pl-2.5 mb-3 bg-emerald-50 py-1 rounded-r-md">6. 核心驅動力 (Outcomes 全 12 項)</h3>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {answers.outcomes.map((item, i) => (
-                                    <div key={item.id} className={`break-inside-avoid flex items-start gap-2.5 p-3 rounded-xl border-2 transition-all ${i < 3 ? 'bg-emerald-50 border-emerald-300 shadow-sm' : 'bg-white border-slate-200'}`}>
-                                        <div className={`flex items-center justify-center text-sm font-black shrink-0 mt-0.5 w-6 h-6 rounded shadow-sm ${i === 0 ? 'bg-yellow-400 text-yellow-900' : i === 1 ? 'bg-slate-300 text-slate-800' : i === 2 ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-500 border border-slate-200 shadow-none'}`}>
-                                            {i+1}
-                                        </div>
-                                        <div className="w-full">
-                                            <span className={`font-black block text-sm mb-0.5 ${i < 3 ? 'text-emerald-900' : 'text-slate-800'}`}>{item.term}</span>
-                                            <span className={`block leading-snug font-bold text-[11px] mb-1.5 ${i < 3 ? 'text-emerald-800' : 'text-slate-500'}`}>{item.desc}</span>
-                                            
-                                            {item.questions && item.questions.length > 0 && (
-                                                <div className={`p-2 rounded bg-slate-50/80 border ${i < 3 ? 'border-emerald-200/60' : 'border-slate-100'}`}>
-                                                    <ul className="space-y-0.5">
-                                                        {item.questions.map((q, qIdx) => (
-                                                            <li key={qIdx} className={`text-[10px] font-extrabold leading-tight ${i < 3 ? 'text-emerald-700' : 'text-slate-500'}`}>{q}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                        )}
-
-                        {answers.traits && (
-                        <section className="card break-inside-avoid">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-purple-800 pl-2.5 mb-3 bg-purple-50 py-1 rounded-r-md">7. 成功特質檢核</h3>
-                            <div className="mb-4 p-3 bg-white border-2 border-emerald-100 rounded-xl shadow-sm">
-                                <h4 className="text-sm mb-2 font-black text-emerald-800 flex items-center gap-1.5"><CheckCircle size={18}/> 您認為您具備的特質 ({answers.traits.length})</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {answers.traits.map((t) => (
-                                    <span key={t} className="bg-emerald-50 border border-emerald-300 text-emerald-900 font-extrabold shadow-sm px-2 py-1.5 rounded-md text-[11px]">{t}</span>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="p-3 bg-slate-50 rounded-xl border-2 border-slate-200">
-                                <h4 className="text-xs font-extrabold text-slate-600 mb-2 flex items-center gap-1.5"><HelpCircle size={14}/> 未勾選項目 / 潛在盲點 ({TRAITS_LIST.length - answers.traits.length})</h4>
-                                <div className="flex flex-wrap gap-1.5 opacity-80">
-                                    {TRAITS_LIST.filter(t => !answers.traits.includes(t)).map(t => (
-                                    <span key={t} className="px-1.5 py-1 bg-white border border-slate-300 text-slate-500 font-bold rounded text-[10px]">{t}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        </section>
-                        )}
-
-                        {isCampusMode && reliabilityResults && (
-                        <section className="card break-inside-avoid no-print">
-                            <h3 className="text-lg font-black text-slate-800 border-l-4 border-rose-700 pl-2.5 mb-3 flex items-center gap-2">
-                                <Fingerprint size={20} className="text-rose-700" /> 系統作答真實性評估
-                            </h3>
-                            <div className={`p-4 rounded-xl border-2 ${reliabilityResults.color} animate-fade-in`}>
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 rounded-full bg-white shadow-sm"><ShieldAlert size={24} /></div>
-                                        <div>
-                                            <div className="text-[10px] font-black opacity-70 uppercase tracking-widest">可靠度等級</div>
-                                            <div className="text-xl font-black">{reliabilityResults.status}</div>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-[10px] font-black opacity-70">信任指數</div>
-                                        <div className="text-2xl font-black">{reliabilityResults.score}%</div>
-                                    </div>
-                                </div>
-                                {reliabilityResults.reasons.length > 0 ? (
-                                    <div className="space-y-2 mt-3 pt-3 border-t border-current border-opacity-20">
-                                        <p className="text-[11px] font-black mb-1 opacity-90">系統偵測到以下異常因子：</p>
-                                        {reliabilityResults.reasons.map((r, i) => (
-                                            <div key={i} className="text-xs flex items-start gap-1.5 font-bold">
-                                                <Zap size={14} className="mt-0.5 shrink-0" /><span>{r}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-xs font-bold flex items-center gap-1.5 mt-3 pt-3 border-t border-current border-opacity-20 opacity-90">
-                                        <CheckCircle size={16} /> 數據表現一致且作答時間合理，具備極高參考價值。
-                                    </div>
-                                )}
-                            </div>
-                            <p className="mt-2 text-[10px] text-slate-400 font-bold text-center">本報告由系統演算法自動產生，僅供面試初步篩選參考。</p>
-                        </section>
-                        )}
-                    </div>
-
-                    <section className="card break-inside-avoid page-break-before">
-                        <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
-                            <h3 className="text-lg font-black text-slate-800 flex items-center gap-2"><Brain size={20} className="text-slate-700"/> 8. 深度分析報告</h3>
-                            <button onClick={() => setIsEditingReport(!isEditingReport)} className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-black transition-colors shadow-sm no-print ${isEditingReport ? 'bg-emerald-100 text-emerald-900 border border-emerald-200' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50'}`}>
-                            {isEditingReport ? <><Eye size={16}/> 預覽渲染</> : <><Edit3 size={16}/> 編輯模式</>}
-                            </button>
-                        </div>
-                        {isEditingReport ? (
-                            <div className="space-y-3 no-print">
-                                <div className="flex justify-between items-end">
-                                    <p className="text-xs font-bold text-slate-600">💡 提示：複製下方指令後，將分析結果貼上至此。</p>
-                                    <button onClick={async () => { try { const text = await navigator.clipboard.readText(); if(text) { setAiReportContent(text); showToast("已成功貼上報告", "success"); } } catch(err) { showToast("請手動長按貼上", "error"); } }} className="flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm active:scale-95 border border-indigo-200">
-                                        <Clipboard size={14} /> 貼上報告
-                                    </button>
-                                </div>
-                                <textarea className={`w-full h-64 p-4 border-2 border-slate-200 ${isCampusMode ? 'rounded-xl shadow-inner' : 'rounded-lg'} focus:ring-4 focus:ring-slate-100 focus:border-slate-800 outline-none text-slate-700 leading-relaxed font-mono text-xs font-bold`} placeholder="請在此貼上內容..." value={aiReportContent} onChange={(e) => setAiReportContent(e.target.value)}></textarea>
-                            </div>
-                        ) : (
-                            <div className="relative group">
-                                <div className="absolute top-0 right-0 no-print">
-                                    <button onClick={() => { if(aiReportContent) { handleCopyText(aiReportContent, () => showToast("已複製", "success")); } else showToast("無內容", "error"); }} className="flex items-center gap-1.5 text-xs font-black text-slate-700 bg-white border border-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors shadow-sm active:scale-95"><Copy size={14} /> 複製結果</button>
-                                </div>
-                                {/* MARKDOWN RENDERED CONTENT */}
-                                <div className="ai-report-content bg-white p-0 text-slate-800 mt-2">
-                                    {renderMarkdown(aiReportContent)}
-                                </div>
-                            </div>
-                        )}
-                    </section>
-                </div>
-
-                <div className={`fixed bottom-0 left-0 right-0 ${isCampusMode ? 'p-3 sm:p-4' : 'p-3'} shadow-[0_-10px_40px_rgba(0,0,0,0.1)] bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 no-print`}>
-                    {isCampusMode ? (
-                        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
-                            <div className="w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar flex items-center gap-2">
-                                <button onClick={() => handleCopyText(getSummaryPrompt(), () => showToast("簡介報告指令已複製", "success"))} className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl font-black text-sm hover:bg-amber-100 transition-colors active:scale-95 shadow-sm"><Sparkles size={18}/> 測驗簡介報告</button>
-                                <button onClick={() => handleCopyText(getCampusAgentPrompt(), () => showToast("業務潛能分析指令已複製", "success"))} className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-xl font-black text-sm hover:bg-indigo-100 transition-colors active:scale-95 shadow-sm"><Briefcase size={18}/> 業務潛能分析</button>
-                                <button onClick={() => handleCopyText(getCandidatePrompt(), () => showToast("受測者回饋指令已複製", "success"))} className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-black text-sm hover:bg-emerald-100 transition-colors active:scale-95 shadow-sm"><User size={18}/> 受測者回饋</button>
-                                <button onClick={() => handleCopyText(getReliabilityPrompt(), () => showToast("真實性深度分析指令已複製", "success"))} className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl font-black text-sm hover:bg-rose-100 transition-colors active:scale-95 shadow-sm"><Activity size={18}/> 真實性分析</button>
-                            </div>
-                            <div className="flex gap-2 w-full md:w-auto flex-shrink-0">
-                                <button onClick={handleExportPDF} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3.5 bg-indigo-600 text-white rounded-xl font-black text-sm hover:bg-indigo-700 transition-all shadow-md active:scale-95">
-                                    <Download size={20}/> 輸出 PDF
-                                </button>
-                                <button onClick={handlePrintClick} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3.5 bg-slate-900 text-white rounded-xl font-black text-sm hover:bg-slate-800 transition-all shadow-md active:scale-95">
-                                    <Printer size={20}/> 列印
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="max-w-4xl mx-auto">
-                            <div className="flex justify-center gap-3 mb-3">
-                                <button onClick={handleExportPDF} className="flex-1 md:flex-none min-w-[200px] flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-600 text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-md active:scale-95">
-                                    <Download size={20}/> 輸出 PDF
-                                </button>
-                                <button onClick={handlePrintClick} className="flex-1 md:flex-none min-w-[200px] flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 text-white rounded-xl font-black hover:bg-slate-800 transition-all shadow-md active:scale-95">
-                                    <Printer size={20}/> 列印報告
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap justify-center gap-2">
-                                <button onClick={() => handleCopyText(getSummaryPrompt(), () => showToast("簡介報告指令已複製", "success"))} className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-300 text-slate-800 rounded-lg font-black text-sm hover:bg-slate-50 transition-all active:scale-95 shadow-sm"><Sparkles size={16} className="text-amber-500"/> <span>測驗簡介報告</span></button>
-                                <button onClick={() => handleCopyText(getStandardAgentPrompt(), () => showToast("業務分析指令已複製", "success"))} className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-300 text-slate-800 rounded-lg font-black text-sm hover:bg-slate-50 transition-all active:scale-95 shadow-sm"><Briefcase size={16} className="text-indigo-600"/> <span>業務潛能分析</span></button>
-                                <button onClick={() => handleCopyText(getCandidatePrompt(), () => showToast("受測者回饋指令已複製", "success"))} className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-300 text-slate-800 rounded-lg font-black text-sm hover:bg-slate-50 transition-all active:scale-95 shadow-sm"><User size={16} className="text-emerald-600"/> <span>受測者回饋</span></button>
-                                <button onClick={() => handleCopyText(getSalesAssistantPrompt(), () => showToast("助理適配分析指令已複製", "success"))} className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-300 text-slate-800 rounded-lg font-black text-sm hover:bg-slate-50 transition-all active:scale-95 shadow-sm"><Users size={16} className="text-orange-600"/> <span>助理適配分析</span></button>
-                                <button onClick={() => handleCopyText(getAssistantToAgentPrompt(), () => showToast("轉型引導指令已複製", "success"))} className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-300 text-slate-800 rounded-lg font-black text-sm hover:bg-slate-50 transition-all active:scale-95 shadow-sm"><TrendingUp size={16} className="text-rose-600"/> <span>助理轉正引導</span></button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-                </div>
-            );
-        }
-
-        // --- CAMPUS SETUP COMPONENT ---
-        function CampusSetup({ candidateInfo, setCandidateInfo, setQuizConfig, setAnswers, setQuizStartTime, setQuizDuration, setView, showToast }) {
-            const [localModules, setLocalModules] = useState({ disc: true, values: true, outcomes: true, traits: true, enneagram: true, big5: true, holland: true });
-            
-            const handleCampusStart = () => {
-                const activeModules = Object.keys(localModules).filter(k => localModules[k]);
-                if (activeModules.length === 0) { showToast("請至少選擇一個測驗模組", "error"); return; }
-                if (!candidateInfo.name.trim()) { showToast("請輸入求職者姓名", "error"); return; }
-                
-                setQuizConfig({ modules: activeModules, timestamp: Date.now() });
-                setAnswers({}); setQuizStartTime(Date.now()); setQuizDuration(null); setView('quiz');
-            };
-
-            const [secretClicks, setSecretClicks] = useState(0);
-            const triggerDemo = () => {
-                const nextClicks = secretClicks + 1;
-                setSecretClicks(nextClicks);
-                if (nextClicks === 5) {
-                    setCandidateInfo({ name: '測試員 DEMO (校園)', dob: '1999-01-01' });
-                    setQuizConfig({ modules: MODULES_MAP, timestamp: Date.now() });
-                    setAnswers({ disc: { D: 6, I: 3, S: 1, C: 0 }, values: { "升遷": 5, "成就感": 8, "待遇": 6, "自主性": 2, "環境": 4, "同事": 3, "自我成長": 7 }, outcomes: OUTCOMES_ITEMS.slice(), traits: TRAITS_LIST.slice(0, 10), enneagram: { "1": 1, "2": 0, "3": 5, "4": 0, "5": 1, "6": 2, "7": 4, "8": 3, "9": 1 }, big5: { E: 6, A: 7, C: 8, N: 3, O: 9 }, holland: { R: 2, I: 4, A: 5, S: 3, E: 5, C: 1 } });
-                    setQuizDuration(380); setView('result'); showToast("載入 Demo (校園版)", "success");
-                    setSecretClicks(0);
-                }
-                setTimeout(() => setSecretClicks(prev => Math.max(0, prev - 1)), 1000);
-            };
-
-            return (
-                <div className="bg-white p-6 sm:p-8 md:p-12 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-200 max-w-2xl mx-auto animate-fade-in">
-                    <h2 onClick={triggerDemo} className="text-xl font-black text-slate-800 mb-6 sm:mb-8 text-center bg-slate-50 py-4 rounded-lg border border-slate-200 select-none cursor-pointer">請設定測驗項目並讓求職者填寫資料</h2>
-                    <div className="mb-8 space-y-4">
-                        <div className="flex items-center gap-2 mb-2 text-slate-800 font-black text-lg"><User size={20}/> 受測者資料</div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <input type="text" value={candidateInfo.name} onChange={(e) => setCandidateInfo({...candidateInfo, name: e.target.value})} autoComplete="off" className="w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-slate-200 focus:border-slate-800 outline-none transition-all text-lg font-bold placeholder:font-bold bg-gray-50 focus:bg-white" placeholder="請輸入姓名 (必填)" />
-                            <input type="date" value={candidateInfo.dob} onChange={(e) => setCandidateInfo({...candidateInfo, dob: e.target.value})} autoComplete="off" className="w-full p-4 border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-slate-200 focus:border-slate-800 outline-none transition-all text-slate-700 font-bold bg-gray-50 focus:bg-white" />
-                        </div>
-                    </div>
-                    <div className="mb-10">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-2 text-slate-800 font-black text-lg"><List size={20}/> 測驗項目</div>
-                            <button onClick={() => setLocalModules({disc: true, values: true, outcomes: true, traits: true, enneagram: true, big5: true, holland: true})} className="text-sm text-indigo-700 hover:text-indigo-900 font-black px-4 py-2 rounded-lg hover:bg-indigo-100 transition-colors active:scale-95 bg-indigo-50 border border-indigo-200">全選</button>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            {[{ id: 'disc', label: '1. DISC 行為風格', sub: '溝通與行事作風' }, { id: 'values', label: '2. 工作價值觀', sub: '找尋核心在乎事物' }, { id: 'outcomes', label: '3. Outcomes 驅動力', sub: '深層心理動機' }, { id: 'traits', label: '4. 成功特質檢核', sub: '自信與盲點掃描' }, { id: 'enneagram', label: '5. 九型人格', sub: '核心渴望與恐懼' }, { id: 'big5', label: '6. 大五人格', sub: '穩定性與盡責度' }, { id: 'holland', label: '7. Holland 職業興趣', sub: '適合的任務型態' }].map(m => (
-                            <div key={m.id} onClick={() => setLocalModules({...localModules, [m.id]: !localModules[m.id]})} className={`p-4 sm:p-5 border-2 rounded-xl cursor-pointer transition-all flex justify-between items-center select-none active:scale-95 ${localModules[m.id] ? 'border-slate-800 bg-slate-50 shadow-sm' : 'border-gray-200 hover:bg-gray-50'}`}>
-                                <div><div className={`font-black text-base sm:text-lg ${localModules[m.id] ? 'text-slate-900' : 'text-slate-500'}`}>{m.label}</div><div className="text-sm font-bold text-slate-500 mt-1">{m.sub}</div></div>
-                                <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors ${localModules[m.id] ? 'bg-slate-800 border-slate-800 text-white' : 'border-gray-300 bg-white text-transparent'}`}><CheckCircle size={18} fill="currentColor" className="text-slate-800"/></div>
-                            </div>
-                            ))}
-                        </div>
-                    </div>
-                    <button onClick={handleCampusStart} className="w-full bg-slate-900 text-white font-black text-xl py-5 rounded-xl hover:bg-slate-800 transition-all shadow-lg active:translate-y-1 flex justify-center items-center gap-3">
-                        <Play size={24} fill="currentColor"/> 立即開始測驗
-                    </button>
-                </div>
-            );
-        }
-
-        // --- MAIN APPLICATION ---
-        function PersonalityPortal() {
-            const [view, setView] = useState('landing');
-            const [systemMode, setSystemMode] = useState('standard');
-            
-            const [isGodMode, setIsGodMode] = useState(false);
-            const [godModeClicks, setGodModeClicks] = useState(0);
-            
-            const [toast, setToast] = useState({ show: false, msg: '', type: 'info' });
-            const [inputCode, setInputCode] = useState('');
-            
-            const [quizConfig, setQuizConfig] = useState(null);
-            const [candidateInfo, setCandidateInfo] = useState({ name: '', dob: '' });
-            const [answers, setAnswers] = useState({});
-            
-            const [quizStartTime, setQuizStartTime] = useState(null);
-            const [quizDuration, setQuizDuration] = useState(null);
-
-            useEffect(() => {
-                const handleBeforeUnload = (e) => { if (view === 'quiz') { e.preventDefault(); e.returnValue = ''; } };
-                window.addEventListener('beforeunload', handleBeforeUnload); return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-            }, [view]);
-
-            const showToast = (msg, type = 'info') => {
-                setToast({ show: true, msg, type });
-                setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
-            };
-
-            const handleLogoClick = () => {
-                const next = godModeClicks + 1; setGodModeClicks(next);
-                if (next === 5) { 
-                    if (systemMode === 'campus') {
-                        setCandidateInfo(DEMO_CANDIDATE);
-                        setQuizConfig({ modules: MODULES_MAP, timestamp: Date.now() });
-                        setAnswers(DEMO_ANSWERS);
-                        setQuizDuration(380); setView('result'); showToast("載入 Demo (校園版)", "success");
-                    } else {
-                        if (!isGodMode) { setIsGodMode(true); showToast("管理員模式已解鎖", "success"); }
-                    }
-                    setGodModeClicks(0); 
-                }
-                setTimeout(() => { setGodModeClicks(prev => Math.max(0, prev - 1)); }, 1000);
-            };
-
-            const handleCodeSubmit = () => {
-                if (!inputCode.trim()) { showToast("請輸入代碼", "error"); return; }
-                if (inputCode === '1111') {
-                    if (!isGodMode) { showToast("權限不足：請先解鎖管理員模式", "error"); return; }
-                    setQuizConfig({ modules: MODULES_MAP, timestamp: Date.now() });
-                    setCandidateInfo(DEMO_CANDIDATE);
-                    setAnswers(DEMO_ANSWERS);
-                    setView('result'); showToast("Demo 數據已載入", "success"); return;
-                }
-                const data = safeDecode(inputCode);
-                if (data && data.modules) {
-                    setQuizConfig(data); setAnswers({}); setCandidateInfo({ name: '', dob: '' }); setView('candidate-info'); showToast("測驗載入成功", "success"); return;
-                }
-                if (data && data.answers) {
-                    if (!isGodMode) { showToast("權限不足：僅面試官可查看結果", "error"); return; }
-                    setQuizConfig(data.config); setAnswers(data.answers); setCandidateInfo(data.candidate || { name: '未知', dob: '未知' }); setView('result'); showToast("報告解析成功", "success"); return;
-                }
-                showToast("無效的代碼格式", "error");
-            };
-
-            const enterCampusMode = () => { setSystemMode('campus'); setView('campus-setup'); };
-            
-            const handleCampusReset = () => {
-                if(confirm("確定清除當前資料，迎接下一位求職者？")) {
-                    setCandidateInfo({ name: '', dob: '' }); setAnswers({}); setQuizConfig(null); setQuizStartTime(null); setQuizDuration(null); setView('campus-setup'); window.scrollTo(0, 0);
-                }
-            };
-
-            return (
-                <div className="min-h-screen bg-gray-50 text-slate-800 font-sans font-medium selection:bg-slate-200 selection:text-slate-900">
-                
-                <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm backdrop-blur-md bg-white/95 no-print">
-                    <div className={`max-w-4xl mx-auto px-4 ${systemMode === 'campus' ? 'sm:px-6 h-16 md:h-20' : 'h-14'} flex items-center justify-between`}>
-                        <div className="flex items-center gap-3 sm:gap-4 select-none cursor-pointer group" onClick={handleLogoClick}>
-                            <div className={`p-2 sm:p-2.5 rounded-lg transition-colors shadow-sm ${systemMode === 'campus' ? 'bg-slate-900 text-white' : isGodMode ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-slate-100 text-slate-800 group-hover:bg-slate-200'}`}>
-                                {systemMode === 'campus' ? <Target size={24} className="sm:w-7 sm:h-7" /> : <Shield size={20} />}
-                            </div>
-                            <div>
-                                <h1 className={`font-black ${systemMode === 'campus' ? 'text-lg sm:text-xl mb-1' : 'text-lg'} tracking-tight text-slate-900 leading-none`}>Personality Portal</h1>
-                                {systemMode === 'campus' ? <span className="text-[10px] sm:text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-black tracking-widest uppercase border border-indigo-200">Campus Mode</span> : isGodMode && <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">ADMIN</span>}
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            {systemMode === 'campus' ? (
-                                <>
-                                    {view === 'result' && (
-                                        <button onClick={handleCampusReset} className="text-sm font-black text-slate-700 hover:text-slate-900 transition-colors flex items-center gap-2 bg-slate-100 border border-slate-200 px-4 sm:px-5 py-2.5 rounded-lg active:scale-95 shadow-sm">
-                                            <RefreshCw size={18} /> <span className="hidden sm:inline">下一位</span>
-                                        </button>
-                                    )}
-                                </>
-                            ) : (
-                                view !== 'landing' && (
-                                    <button onClick={() => setView('landing')} className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">回首頁</button>
-                                )
-                            )}
-                        </div>
-                    </div>
-                </header>
-
-                {toast.show && (
-                    <div className={`fixed top-24 right-4 z-50 px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 animate-bounce-in border-2 ${toast.type === 'error' ? 'bg-red-50 text-red-800 border-red-200' : toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-800 text-white border-slate-700'} no-print`}>
-                        {toast.type === 'error' ? <AlertCircle size={24}/> : <CheckCircle size={24}/>}
-                        <span className="font-black tracking-wide text-sm sm:text-base">{toast.msg}</span>
-                    </div>
-                )}
-
-                <main className={`max-w-4xl mx-auto px-4 sm:px-6 ${systemMode === 'campus' ? 'py-8 sm:py-12' : 'py-10'}`}>
-                    
-                    {/* --- STANDARD MODE: LANDING --- */}
-                    {systemMode === 'standard' && view === 'landing' && (
-                    <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-8 animate-fade-in">
-                        <div className="text-center space-y-3">
-                            <h2 className="text-4xl font-black text-slate-900 tracking-tight">人才潛能評測系統</h2>
-                            <p className="text-slate-600 font-bold">Professional Personality Assessment</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200 w-full max-w-lg transition-all hover:shadow-xl">
-                            <label className="block text-xs font-black text-slate-600 uppercase tracking-wider mb-3">輸入存取代碼 (Config / Result)</label>
-                            <div className="flex gap-3">
-                                <input type="text" value={inputCode} onChange={(e) => setInputCode(e.target.value)} placeholder="在此貼上代碼..." className="flex-1 p-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-4 focus:ring-slate-200 focus:border-slate-600 outline-none font-mono text-base font-bold transition-all" />
-                                <button onClick={handleCodeSubmit} className="bg-slate-900 hover:bg-slate-800 text-white px-6 rounded-lg transition-all shadow-md active:translate-y-0.5 flex items-center justify-center"><Play size={20} fill="currentColor" /></button>
-                            </div>
-                        </div>
-                        
-                        {/* GOD MODE MENU */}
-                        {isGodMode && (
-                        <div className="w-full max-w-lg pt-6 grid grid-cols-2 gap-4 animate-fade-in">
-                            <button onClick={enterCampusMode} className="col-span-2 w-full bg-indigo-700 text-white p-6 rounded-xl flex items-center justify-center gap-3 hover:bg-indigo-800 transition-all shadow-[0_8px_20px_rgb(0,0,0,0.12)] font-black text-xl tracking-wide border border-indigo-600 mb-2 active:scale-[0.98]">
-                                <Target size={28} /> 🎯 啟動「校園徵才」現場單機模式
-                            </button>
-                            <button onClick={() => setView('setup')} className="col-span-2 w-full bg-slate-800 text-white p-5 rounded-lg flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-md font-bold text-lg tracking-wide border border-slate-700">
-                                <Settings size={20} /> 建立新測驗代碼 (遠端發送標準版)
-                            </button>
-                            <button onClick={() => setView('tutorial')} className="col-span-2 bg-white text-slate-700 border-2 border-gray-200 p-5 rounded-lg flex items-center justify-center gap-3 hover:border-slate-300 hover:bg-gray-50 transition-all font-bold text-lg shadow-sm">
-                                <BookOpen size={22} className="text-slate-600"/> 系統教學
-                            </button>
-                        </div>
-                        )}
-                    </div>
-                    )}
-
-                    {/* --- STANDARD MODE: VIEWS --- */}
-                    {systemMode === 'standard' && view === 'setup' && <QuizConfigurator showToast={showToast} onGenerate={() => {}} />}
-                    
-                    {systemMode === 'standard' && view === 'candidate-info' && (
-                    <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200 max-w-lg mx-auto animate-fade-in">
-                        <h2 className="text-2xl font-black mb-6 flex items-center gap-2 text-slate-800 tracking-tight"><User className="text-slate-700" /> 受測者資料</h2>
-                        <div className="space-y-5">
-                            <div><label className="block text-base font-bold text-slate-800 mb-2">真實姓名</label><input type="text" value={candidateInfo.name} onChange={(e) => setCandidateInfo({...candidateInfo, name: e.target.value})} className="w-full p-4 border border-gray-300 rounded-lg focus:ring-4 focus:ring-slate-200 focus:border-slate-800 outline-none font-bold text-lg bg-gray-50 focus:bg-white transition-all" placeholder="請輸入姓名" /></div>
-                            <div><label className="block text-base font-bold text-slate-800 mb-2">出生年月日</label><input type="date" value={candidateInfo.dob} onChange={(e) => setCandidateInfo({...candidateInfo, dob: e.target.value})} className="w-full p-4 border border-gray-300 rounded-lg focus:ring-4 focus:ring-slate-200 focus:border-slate-800 outline-none font-bold text-slate-700 bg-gray-50 focus:bg-white transition-all" /></div>
-                            <button onClick={() => { if(!candidateInfo.name || !candidateInfo.dob) { showToast("請完整填寫資料", "error"); return; } setView('quiz'); }} className="w-full btn-prominent mt-4 flex items-center justify-center gap-2 text-lg py-4 rounded-xl shadow-md">開始測驗 <ArrowRight size={20} /></button>
-                        </div>
-                    </div>
-                    )}
-
-                    {systemMode === 'standard' && view === 'finish' && (
-                    <div className="bg-white p-12 rounded-xl shadow-xl border border-gray-200 text-center space-y-6 max-w-2xl mx-auto mt-8 animate-fade-in">
-                        <div className="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto ring-4 ring-emerald-50/50"><CheckCircle size={40} strokeWidth={3} /></div>
-                        <h2 className="text-4xl font-black text-slate-900 tracking-tight">測驗完成</h2>
-                        <p className="text-slate-700 font-bold text-lg leading-relaxed">請複製下方代碼並傳送給面試官。<br/><span className="text-rose-600 text-sm font-black block mt-4 uppercase tracking-widest bg-rose-50 inline-block px-4 py-2 rounded-lg border border-rose-200">⚠️ 關閉視窗前請確保代碼已傳送</span></p>
-                        <div className="relative group mt-8">
-                            <div className="bg-gray-50 p-8 rounded-xl break-all font-mono text-base font-bold border border-gray-300 text-slate-700 text-left min-h-[120px] shadow-inner">{inputCode}</div>
-                            <button onClick={() => handleCopyText(inputCode, () => showToast("已複製", "success"))} className="absolute top-3 right-3 p-3 bg-white rounded-lg shadow-md border border-gray-200 text-slate-700 hover:bg-slate-50 transition-colors active:scale-95"><Copy size={20} /></button>
-                        </div>
-                    </div>
-                    )}
-
-                    {/* --- STANDARD MODE: TUTORIAL --- */}
-                    {systemMode === 'standard' && view === 'tutorial' && (
-                    <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200 max-w-3xl mx-auto animate-fade-in">
-                        <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3"><BookOpen className="text-slate-700"/> 雙模式系統使用教學</h2>
-                        <div className="space-y-8">
-                            <div className="p-6 border-2 border-indigo-200 bg-indigo-50 rounded-xl mb-8 shadow-sm">
-                                <h3 className="font-black text-indigo-900 text-lg mb-3 flex items-center gap-2"><Target size={22}/> 校園徵才模式 (一條龍單機版)</h3>
-                                <p className="text-indigo-800 text-base font-bold leading-relaxed mb-3">適合場景：實體博覽會、說明會。主打快速、高流動率。</p>
-                                <ul className="list-disc ml-6 text-indigo-800 text-sm space-y-2 font-bold">
-                                    <li>免傳遞代碼，受測者做完立即顯示報告。</li>
-                                    <li>專屬 <span className="bg-indigo-100 px-2 py-0.5 rounded text-indigo-900">「作答真實性評估」</span>，秒抓亂點、護航。</li>
-                                    <li>右上角「下一位」按鈕一鍵重置。</li>
-                                </ul>
-                            </div>
-                            <div className="flex gap-5">
-                                <div className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center font-black shrink-0 text-base shadow-md">1</div>
-                                <div><h3 className="font-black text-lg mb-2 text-slate-800">建立測驗 (遠端發送)</h3><p className="text-slate-600 text-base font-bold leading-relaxed">首頁解鎖管理員模式後，點擊「建立新測驗代碼」。勾選模組，生成 Config Code 複製給受測者。</p></div>
-                            </div>
-                            <div className="flex gap-5">
-                                <div className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center font-black shrink-0 text-base shadow-md">2</div>
-                                <div><h3 className="font-black text-lg mb-2 text-slate-800">進行測驗 (受測端)</h3><p className="text-slate-600 text-base font-bold leading-relaxed">受測者在首頁貼上 Config Code 作答。完成後，系統會生成 Result Code。</p></div>
-                            </div>
-                            <div className="flex gap-5">
-                                <div className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center font-black shrink-0 text-base shadow-md">3</div>
-                                <div><h3 className="font-black text-lg mb-2 text-slate-800">解析報告 (面試官)</h3><p className="text-slate-600 text-base font-bold leading-relaxed">拿到 Result Code 後貼回首頁，系統將顯示視覺化報告及系統指令供您深度分析。</p></div>
-                            </div>
-                        </div>
-                    </div>
-                    )}
-
-                    {/* --- CAMPUS MODE: SETUP --- */}
-                    {systemMode === 'campus' && view === 'campus-setup' && (
-                        <CampusSetup 
-                            candidateInfo={candidateInfo} 
-                            setCandidateInfo={setCandidateInfo} 
-                            setQuizConfig={setQuizConfig} 
-                            setAnswers={setAnswers} 
-                            setQuizStartTime={setQuizStartTime} 
-                            setQuizDuration={setQuizDuration} 
-                            setView={setView} 
-                            showToast={showToast} 
-                        />
-                    )}
-
-                    {/* --- COMMON QUIZ RUNNER --- */}
-                    {view === 'quiz' && quizConfig && (
-                    <QuizRunner 
-                        config={quizConfig} candidateInfo={candidateInfo} isCampusMode={systemMode === 'campus'}
-                        onComplete={(finalAnswers) => {
-                            if (systemMode === 'campus') {
-                                const durationSecs = Math.round((Date.now() - quizStartTime) / 1000);
-                                setAnswers(finalAnswers); setQuizDuration(durationSecs); setView('result');
-                            } else {
-                                const resultCode = safeEncode({ config: quizConfig, answers: finalAnswers, candidate: candidateInfo, completedAt: Date.now() });
-                                setAnswers(finalAnswers); setInputCode(resultCode); setView('finish');
-                            }
-                        }}
-                    />
-                    )}
-
-                    {/* --- COMMON RESULT DASHBOARD --- */}
-                    {view === 'result' && <ResultDashboard answers={answers} config={quizConfig} candidateInfo={candidateInfo} showToast={showToast} isCampusMode={systemMode === 'campus'} duration={quizDuration} />}
-
-                </main>
-                </div>
-            );
-        }
-
-        const root = createRoot(document.getElementById('root'));
-        root.render(<PersonalityPortal />);
-    </script>
+              </div>
+            </div>
+          </main>
+
+          {/* 頁尾 */}
+          <footer className="bg-white border-t border-slate-200 py-8 text-center text-slate-500 text-sm">
+            <p>&copy; {new Date().getFullYear()} My Portfolio. Built with React & Tailwind CSS.</p>
+          </footer>
+
+          {/* 彈出視窗 */}
+          <ProjectModal 
+            project={selectedProject} 
+            onClose={() => setSelectedProject(null)} 
+          />
+        </div>
+      );
+    }
+
+    // 啟動 React 應用
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<PortfolioHub />);
+  </script>
 </body>
 </html>
